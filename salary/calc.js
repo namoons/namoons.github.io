@@ -127,6 +127,13 @@
   function socialInsurance(monthlyTaxable, year, eiRate) {
     var r = C.RATES[year] || C.RATES[2027];
     var monthly = Math.max(0, Math.floor(monthlyTaxable));
+    if (monthly <= 0) {
+      return {
+        np: 0, hi: 0, ltc: 0, ei: 0, total: 0,
+        monthly: { np: 0, hi: 0, ltc: 0, ei: 0 },
+        npBase: { h1: 0, h2: 0 }, capped: false
+      };
+    }
     /* 국민연금: 1~6월 / 7~12월 상한이 다를 수 있어 월별로 계산 */
     var np = 0, npBaseH1 = 0, npBaseH2 = 0;
     for (var m = 0; m < 12; m++) {

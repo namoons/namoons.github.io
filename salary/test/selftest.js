@@ -63,6 +63,12 @@
   check("2026 월 실수령(8,000만·4인)", 5554774, c8000.y2026.monthly.net);
   check("2027 월 실수령(8,000만·4인)", 5539884, c8000.y2027.monthly.net);
 
+  var c1eok = SalCalc.compareYears({ annualSalary: 100000000, monthlyNonTaxable: 200000, dependents: 2, children: 1 });
+  check("2026 월 실수령(1억)", 6679850, c1eok.y2026.monthly.net);
+  check("2027 월 실수령(1억)", 6662244, c1eok.y2027.monthly.net);
+  check("1억 월 차이", -17606, c1eok.diff.monthlyNet);
+  check("1억 연 차이", -211279, c1eok.diff.annualNet);
+
   /* 4. 2027이 항상 2026보다 적은지 (같은 조건) */
   var allLower = true;
   [3000, 4000, 5000, 6000, 8000, 10000, 15000].forEach(function (m) {
@@ -91,6 +97,12 @@
   var neg = SalCalc.normalizePerson({ annualSalary: -100, monthlyNonTaxable: -5, dependents: -2, children: -1 });
   check("음수 입력 0 처리", 0, neg.annualSalary);
   check("부양가족 음수 0 처리", 0, neg.dependents);
+  var overNon = SalCalc.normalizePerson({ annualSalary: 1200000, monthlyNonTaxable: 200000 });
+  check("비과세가 월급보다 크면 월급까지만", 100000, overNon.monthlyNonTaxable);
+  var zeroOut = SalCalc.compareYears({ annualSalary: 0, monthlyNonTaxable: 0, dependents: 0, children: 0 });
+  check("연봉 0 · 월 실수령 0", 0, zeroOut.y2027.monthly.net);
+  check("연봉 0 · NaN 없음", true, isFinite(zeroOut.y2027.monthly.net) && isFinite(zeroOut.diff.monthlyNet));
+
   var family = SalCalc.normalizePerson({ annualSalary: 50000000, dependents: 0, children: 2 });
   check("자녀 수가 부양가족 수보다 크면 보정", 2, family.dependents);
   check("기본공제 인원(본인 포함)", 3, SalCalc.computePerson({ annualSalary: 50000000, dependents: 2, children: 1 }, 2027).tax.basicCount);
