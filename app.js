@@ -441,10 +441,11 @@
   }
 
   /* ---------------- 초기값 ---------------- */
+  /* 예시 값 (카드·의료비·교육비·연금은 만원, 총급여는 만원, 기납부세액은 원 단위) */
   var DEMO = {
     hGross: "6,000", hPrepaid: "2,400,000", wGross: "4,000", wPrepaid: "900,000",
-    hCardCredit: "18,000", hCardCheck: "6,000", hCardTraditional: "600", hCardTransit: "800", hCardCulture: "0",
-    wCardCredit: "12,000", wCardCheck: "5,000", wCardTraditional: "400", wCardTransit: "600", wCardCulture: "0",
+    hCardCredit: "1,800", hCardCheck: "600", hCardTraditional: "60", hCardTransit: "80", hCardCulture: "0",
+    wCardCredit: "1,200", wCardCheck: "500", wCardTraditional: "40", wCardTransit: "60", wCardCulture: "0",
     childCard: "120", hPension: "300", hInsurance: "72", wPension: "0", wInsurance: "60",
     medUnlimited: "100", medGeneral: "200", eduSchool: "600", eduCollege: "0", donation: "0", rent: "0",
     pCount: "0", pSenior: "0", pDisabled: "0"

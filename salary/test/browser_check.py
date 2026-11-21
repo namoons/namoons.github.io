@@ -189,6 +189,41 @@ def main():
         check_links(page, "개인정보")
         page.close()
 
+        # ---------- 6. 브랜드(딱셈)·파비콘·예시 값 ----------
+        for key, rel in [("메인", "index.html"), ("월급", "salary/index.html"), ("개인정보", "privacy/index.html")]:
+            page = browser.new_page(viewport={"width": 1280, "height": 900})
+            watch(page, f"brand-{key}")
+            page.goto((SITE / rel).as_uri())
+            page.wait_for_timeout(300)
+            brand = page.inner_text(".brand").strip()
+            title = page.title()
+            site = page.get_attribute('meta[property="og:site_name"]', "content")
+            icon = page.evaluate("() => document.querySelector('link[rel=icon]').href")
+            ok(f"{key} 브랜드 딱셈", brand == "딱셈" and "딱셈" in page.inner_text(".site-foot"), brand)
+            ok(f"{key} 제목·og:site_name", "딱셈" in title and site == "딱셈", f"{title} / {site}")
+            ok(f"{key} 파비콘 체크 마크", ("%231d4ed8" in icon or "#1d4ed8" in icon) and "path" in icon, icon[:70])
+            ok(f"{key} 로고 SVG 마크", page.evaluate("() => !!document.querySelector('.brand-mark svg path')"))
+            page.close()
+
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        watch(page, "demo")
+        page.goto((SITE / "index.html").as_uri())
+        page.wait_for_selector("#results .result-card", timeout=15000)
+        page.wait_for_timeout(300)
+        initial = page.inner_text("#results .result-big")
+        page.fill("#hCardCredit", "3,000")
+        page.fill("#hGross", "8,000")
+        page.wait_for_timeout(300)
+        page.click("#demoBtn")
+        page.wait_for_timeout(400)
+        cards = [page.input_value("#" + i) for i in
+                 ["hCardCredit", "hCardCheck", "wCardCredit", "wCardCheck", "wCardTraditional", "wCardTransit"]]
+        ok("예시 값 카드 금액 정상(만원)", cards == ["1,800", "600", "1,200", "500", "40", "60"], str(cards))
+        ok("예시 값 총급여 6,000만원", page.input_value("#hGross").strip() == "6,000", page.input_value("#hGross"))
+        ok("예시 값 결과 초기와 동일", page.inner_text("#results .result-big") == initial,
+           f"{page.inner_text('#results .result-big')} vs {initial}")
+        page.close()
+
         browser.close()
 
     # ---------- 6. 정적 검사 ----------
