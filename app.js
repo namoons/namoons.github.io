@@ -420,6 +420,11 @@
     $("singleExtras").hidden = couple;
     document.body.classList.toggle("single-mode", !couple);
     $("hName").textContent = couple ? "남편" : "본인";
+    if ($("hCardName")) $("hCardName").textContent = couple ? "남편" : "본인";
+    if ($("hPensionName")) $("hPensionName").textContent = couple ? "남편" : "본인";
+    Array.prototype.forEach.call(document.querySelectorAll(".mode-single-only"), function (el) {
+      el.hidden = couple;
+    });
     render();
   }
 

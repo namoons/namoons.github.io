@@ -386,6 +386,36 @@ ol.steps li::before {
   }
 }
 
+/* ---------- cross-site navigation ---------- */
+.head-nav a.nav-cross { color: var(--brand); }
+@media (max-width: 760px) {
+  .head-nav { display: flex; gap: 6px; }
+  .head-nav a:not(.nav-cross) { display: none; }
+  .head-nav a.nav-cross {
+    font-size: 12px; font-weight: 700; color: var(--brand);
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 5px 10px; background: #fff; white-space: nowrap;
+  }
+}
+
+/* ---------- footer ---------- */
+.site-foot .foot-note { font-size: 12.5px; color: #4a566d; margin: 0 0 6px; }
+.site-foot .foot-links {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
+  margin: 0; font-size: 12px; color: #7b8798;
+}
+.site-head a:focus-visible, .site-foot a:focus-visible {
+  outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px;
+}
+.site-foot a { color: var(--brand); text-decoration: none; }
+.site-foot a:hover { text-decoration: underline; }
+
+/* ---------- policy page ---------- */
+.policy-head { padding-top: 44px; padding-bottom: 4px; }
+.policy-head h1 { margin-bottom: 12px; }
+.policy-head .lede { margin-bottom: 0; }
+@media (max-width: 640px) { .policy-head { padding-top: 28px; } }
+
 @media print {
   .site-head, .mini-bar, .form, .mode-tabs, .hero-badges { display: none !important; }
   body { background: #fff; }

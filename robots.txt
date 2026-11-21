@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /salary/test/
 
 Sitemap: https://namoons.github.io/sitemap.xml
