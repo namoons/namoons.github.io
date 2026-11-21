@@ -110,6 +110,7 @@ def main():
         ok("2026·2027 비교표 렌더", all(k in table for k in ("2026년", "2027년", "국민연금", "장기요양", "월 실수령액")))
         ov = overflow(page)
         ok("월급 데스크톱 가로 넘침 없음", ov["sw"] <= ov["iw"] + 1 and not ov["over"], str(ov))
+        page.screenshot(path=str(SHOTS / "salary-desktop.png"), full_page=True)
 
         # 입력 변경 → 결과 재계산
         page.fill("#salaryInput", "8,000")
@@ -125,7 +126,6 @@ def main():
         ok("이직 결과 렌더", all(k in offer_text for k in ("이직 세후 월 차액", "실질 인상률", "퇴직금 1년분", "현 직장", "이직 제안")))
         ov = overflow(page)
         ok("이직 결과 가로 넘침 없음", ov["sw"] <= ov["iw"] + 1 and not ov["over"], str(ov))
-        page.screenshot(path=str(SHOTS / "salary-desktop.png"), full_page=True)
         page.screenshot(path=str(SHOTS / "salary-offer-desktop.png"), full_page=True)
         check_links(page, "월급")
         page.close()
