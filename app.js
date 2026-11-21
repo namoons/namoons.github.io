@@ -555,7 +555,7 @@
       updateMini(out, empty);
     } catch (e) {
       console.error(e);
-      $("results").innerHTML = '<div class="result-card"><p>입력값을 확인해 주세요.</p><pre class="err-debug" style="white-space:pre-wrap;font-size:11px;color:#b42318">' + esc(String((e && e.stack) || e)) + '</pre></div>';
+      $("results").innerHTML = '<div class="result-card"><p>입력값을 확인해 주세요.</p></div>';
       updateMini(null, true);
     }
     updateGuards();

@@ -360,6 +360,7 @@
     var refund = prepaid - best.determinedTax;
 
     return {
+      input: p,
       gross: gross,
       prepaid: prepaid,
       earnedDeduction: earnedDeduction,
