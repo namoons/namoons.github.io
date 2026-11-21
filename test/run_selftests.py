@@ -35,6 +35,7 @@ if __name__ == "__main__":
     pairs = [
         ("calc.js", "test/selftest.js"),
         ("salary/calc.js", "salary/test/selftest.js"),
+        ("health/calc.js", "health/test/selftest.js"),
     ]
     total_fail = 0
     for calc, test in pairs:

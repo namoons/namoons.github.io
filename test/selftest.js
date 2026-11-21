@@ -3,6 +3,7 @@
  * 2) 손으로 검산한 맞벌이 배분 시나리오
  * 3) 개별 공제 산식(카드 한도, 자녀세액공제, 표준세액공제 등)
  * 4) P0 회귀: 연금저축 600만 / IRP 합산 900만 한도, 장애 자녀 추가공제, 월세 무주택 요건
+ * 4-1) P1 회귀: 주택자금 3종·종합한도, 산후조리원, 부녀자, 중소기업 감면, 맞벌이 월세 각자, 문화체육 전환
  * 5) 무작위 50가구 교차검증(최적 분할이 몰아주기보다 나쁘지 않아야 함)
  */
 (function () {
@@ -40,9 +41,14 @@
       education: (overrides && overrides.education) || { school: 0, college: 0 },
       donation: (overrides && overrides.donation) || 0,
       rent: (overrides && overrides.rent) || 0,
+      rentW: (overrides && overrides.rentW) || 0,
+      postpartum: (overrides && overrides.postpartum) || 0,
+      births: (overrides && overrides.births) || 1,
+      housing: (overrides && overrides.housing) || null,
+      womanDeduction: !!(overrides && overrides.womanDeduction),
       rentEligible: !!(overrides && overrides.rentEligible),
       spouseDependent: !!(overrides && overrides.spouseDependent),
-      singleParent: false,
+      singleParent: !!(overrides && overrides.singleParent),
       autoInsurance: !(overrides && overrides.autoInsurance === false)
     };
     return YECalc.run(h);
@@ -120,6 +126,10 @@
       education: extras.education || { school: 0, college: 0 },
       donation: extras.donation || 0,
       rent: extras.rent || 0,
+      rentW: extras.rentW || 0,
+      postpartum: extras.postpartum || 0,
+      births: extras.births || 1,
+      housing: extras.housing || null,
       rentEligible: !!extras.rentEligible
     }, {}));
   }
@@ -379,6 +389,83 @@
   var rentCouple = couple(60000000, 30000000, { rent: 8000000, rentEligible: false });
   check("맞벌이 · 월세 요건 미체크면 양쪽 모두 0",
     0, rentCouple.optimal.husband.credits.rent + rentCouple.optimal.wife.credits.rent);
+
+  /* ---------------------------------------------------------------
+   * 4-1. P1 회귀 — 주택자금·산후조리원·부녀자·중소기업·맞벌이 월세·문화체육
+   * --------------------------------------------------------------- */
+  function housing(over) {
+    return Object.assign({ eligible: true, savings: 0, rentLoan: 0, mortgageInterest: 0, mortgageType: "none", owner: 0 }, over || {});
+  }
+
+  var hSave = single({ husband: { gross: 50000000 }, housing: housing({ savings: 3000000 }) }).scenario.husband;
+  check("P1 주택청약 · 300만원 납입 40%", 1200000, hSave.housing.total);
+  check("P1 주택청약 · 소득공제 반영액", 1200000, hSave.housingApplied);
+
+  var hSaveOver = single({ husband: { gross: 80000000 }, housing: housing({ savings: 5000000 }) }).scenario.husband;
+  check("P1 주택청약 · 총급여 8,000만은 공제 0", 0, hSaveOver.housing.savings);
+  check("P1 주택청약 · 7,000만 초과에도 전세대출은 가능", 2000000,
+    single({ husband: { gross: 80000000 }, housing: housing({ rentLoan: 5000000 }) }).scenario.husband.housing.total);
+
+  var hBoth = single({ husband: { gross: 50000000 }, housing: housing({ savings: 3000000, rentLoan: 10000000 }) }).scenario.husband;
+  check("P1 청약+전세대출 · 합산 400만원 한도", 4000000, hBoth.housing.total);
+  check("P1 청약+전세대출 · 전세대출 몫", 2800000, hBoth.housing.rentLoan);
+
+  var hMort = single({ husband: { gross: 60000000 }, housing: housing({ mortgageInterest: 25000000, mortgageType: "m15_fixed_nod" }) }).scenario.husband;
+  check("P1 주담대 · 15년+고정+비거치 2,000만 한도", 20000000, hMort.housing.mortgage);
+  check("P1 주담대 · 소득공제 반영액", 20000000, hMort.housingApplied);
+
+  var hMort10 = single({ husband: { gross: 60000000 }, housing: housing({ mortgageInterest: 25000000, mortgageType: "m10_one" }) }).scenario.husband;
+  check("P1 주담대 · 10~15년 하나 충족 600만 한도", 6000000, hMort10.housing.mortgage);
+
+  var hMortNone = single({ husband: { gross: 60000000 }, housing: housing({ mortgageInterest: 25000000, mortgageType: "none" }) }).scenario.husband;
+  check("P1 주담대 · 상환조건 미선택이면 0", 0, hMortNone.housing.mortgage);
+
+  var hNoElig = single({ husband: { gross: 50000000 }, housing: housing({ savings: 3000000, eligible: false }) }).scenario.husband;
+  check("P1 주택자금 · 세대주 요건 미체크면 0", 0, hNoElig.housingApplied);
+
+  var hCap = single({
+    husband: { gross: 60000000, card: { credit: 35000000, check: 5000000, traditional: 2500000, transit: 1500000 } },
+    children: [{ birthYear: 2012, school: "school" }, { birthYear: 2015, school: "school" }],
+    housing: housing({ mortgageInterest: 25000000, mortgageType: "m15_fixed_nod" })
+  }).scenario.husband;
+  check("P1 소득공제 종합한도 · 카드 560만 + 주택자금", 19400000, hCap.housingApplied, "2,500만 − 560만");
+  check("P1 소득공제 종합한도 · 합계 2,500만", 25000000, hCap.cardDeductionApplied + hCap.housingApplied);
+
+  var post1 = single({ husband: { gross: 50000000 }, postpartum: 3000000 }).scenario.husband;
+  check("P1 산후조리원 · 1회 200만원 한도", 2000000, post1.bases.postpartum);
+  check("P1 산후조리원 · 3% 문턱 차감", 500000, post1.bases.medical, "200만 − 150만");
+
+  var post2 = single({ husband: { gross: 50000000 }, postpartum: 5000000, births: 2 }).scenario.husband;
+  check("P1 산후조리원 · 출산 2회 400만원 한도", 4000000, post2.bases.postpartum);
+
+  var womanOn = single({ husband: { gross: 30000000 }, womanDeduction: true }).scenario.husband;
+  check("P1 부녀자 공제 · 종합소득 3,000만 이하 50만원", 500000, womanOn.personal.woman);
+  var womanOff = single({ husband: { gross: 30000000 } }).scenario.husband;
+  check("P1 부녀자 공제 · 체크 전과 차이 50만원", 500000, womanOn.personal.total - womanOff.personal.total);
+  check("P1 부녀자 공제 · 종합소득 3,000만 초과면 0", 0,
+    single({ husband: { gross: 50000000 }, womanDeduction: true }).scenario.husband.personal.woman);
+  check("P1 부녀자 공제 · 한부모와 중복이면 부녀자 0", 0,
+    single({ husband: { gross: 30000000 }, womanDeduction: true, singleParent: true }).scenario.husband.personal.woman);
+
+  var smeYouth = single({ husband: { gross: 50000000, sme: "youth" } }).scenario.husband;
+  check("P1 중소기업 청년 90% 감면 · 산출세액", 3448701, smeYouth.calculatedTax);
+  check("P1 중소기업 청년 90% 감면 · 연 200만원 한도", 2000000, smeYouth.smeExemption);
+  check("P1 중소기업 감면 후 세액", 1448701, smeYouth.taxAfterExemption);
+
+  var smeOther = single({ husband: { gross: 30000000, sme: "other" } }).scenario.husband;
+  check("P1 중소기업 고령·경력단절 70%", Math.floor(smeOther.calculatedTax * 0.7), smeOther.smeExemption);
+
+  var rentEach = couple(50000000, 60000000, { rent: 8000000, rentW: 6000000, rentEligible: true });
+  check("P1 맞벌이 월세 각자 · 남편 17%", 1360000, rentEach.optimal.husband.credits.rent);
+  check("P1 맞벌이 월세 각자 · 아내 15%", 900000, rentEach.optimal.wife.credits.rent);
+  var rentCap = couple(50000000, 60000000, { rent: 15000000, rentW: 15000000, rentEligible: true });
+  check("P1 맞벌이 월세 각자 · 각 1,000만 한도", 1700000, rentCap.optimal.husband.credits.rent);
+
+  var cultureOver = single({ husband: { gross: 80000000, card: { credit: 0, check: 0, traditional: 0, transit: 0, culture: 1000000 } } }).scenario.husband;
+  check("P1 문화체육 · 7,000만 초과는 신용 15%로 전환", 1000000, cultureOver.card.cultureConverted);
+  var cultureUnder = single({ husband: { gross: 60000000, card: { credit: 0, check: 0, traditional: 0, transit: 0, culture: 1000000 } } }).scenario.husband;
+  check("P1 문화체육 · 7,000만 이하는 30% 유지", 0, cultureUnder.card.cultureConverted);
+  check("P1 문화체육 · 30% 가중치", 300000, cultureUnder.card.weighted);
 
   /* ---------------------------------------------------------------
    * 7. 무작위 교차검증

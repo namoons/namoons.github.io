@@ -112,6 +112,7 @@
         pension: manOf("hPensionSaving"),
         irp: manOf("hIrp"),
         insurance: manOf("hInsurance"),
+        sme: (($("smeH") && $("smeH").value) || "none"),
         card: {
           credit: manOf("hCardCredit"),
           check: manOf("hCardCheck"),
@@ -126,6 +127,8 @@
         pension: single ? 0 : manOf("wPensionSaving"),
         irp: single ? 0 : manOf("wIrp"),
         insurance: single ? 0 : manOf("wInsurance"),
+        woman: !single && !!($("womanW") && $("womanW").checked),
+        sme: single ? "none" : (($("smeW") && $("smeW").value) || "none"),
         card: {
           credit: single ? 0 : manOf("wCardCredit"),
           check: single ? 0 : manOf("wCardCheck"),
@@ -149,10 +152,22 @@
         transit: 0
       },
       medical: { general: manOf("medGeneral"), unlimited: manOf("medUnlimited") },
+      postpartum: manOf("postpartum"),
+      births: numOf("births") || 1,
       education: { school: manOf("eduSchool"), college: manOf("eduCollege") },
       donation: manOf("donation"),
-      rent: manOf("rent"),
+      rentH: manOf("rent"),
+      rentW: single ? 0 : manOf("rentW"),
       rentEligible: $("rentEligible").checked,
+      housing: {
+        owner: (($("houseTarget") && $("houseTarget").value) === "w" && !single) ? 1 : 0,
+        savings: manOf("housingSavings"),
+        rentLoan: manOf("rentLoan"),
+        mortgageInterest: manOf("mortgageInterest"),
+        mortgageType: ($("mortgageType") && $("mortgageType").value) || "none",
+        eligible: !!($("housingEligible") && $("housingEligible").checked)
+      },
+      womanDeduction: single && !!($("womanSingle") && $("womanSingle").checked),
       spouseDependent: single && $("spouseDependent").checked,
       singleParent: single && $("singleParent").checked,
       autoInsurance: $("autoInsurance").checked
@@ -168,7 +183,8 @@
     "wCardCredit", "wCardCheck", "wCardTraditional", "wCardTransit", "wCardCulture",
     "childCard", "depCardCredit", "depCardCheck", "depCardTraditional",
     "hPensionSaving", "hIrp", "wPensionSaving", "wIrp", "hInsurance", "wInsurance",
-    "medUnlimited", "medGeneral", "eduSchool", "eduCollege", "donation", "rent"
+    "medUnlimited", "medGeneral", "eduSchool", "eduCollege", "donation", "rent", "rentW",
+    "postpartum", "housingSavings", "rentLoan", "mortgageInterest"
   ];
   var WON_FIELDS = ["hPrepaid", "wPrepaid"];
   var warnEls = {};
@@ -325,13 +341,57 @@
         " (다른 쪽 " + manwon(target === H ? wThresh : hThresh) + ")");
     }
 
-    if (h.rent > 0 && !h.rentEligible) {
-      items.push("월세 " + manwon(h.rent) + "을 입력했지만 <b>무주택 세대주 요건</b>을 체크하지 않아 세액공제에서 제외했습니다.");
-    } else if (h.rent > 0) {
-      var renter = a.rentOwner === 0 ? H : W;
-      items.push("월세 " + manwon(h.rent) + " → <b>" + renter + "</b> · 총급여 " +
-        ((a.rentOwner === 0 ? h.husband.gross : h.wife.gross) <= 55000000 ? "5,500만원 이하 17%" : "15%") + " 구간");
+    if (h.rentH > 0 && !h.rentEligible) {
+      items.push("월세 " + manwon(h.rentH) + "을 입력했지만 <b>무주택 세대주 요건</b>을 체크하지 않아 세액공제에서 제외했습니다.");
+    } else if (h.rentH > 0) {
+      items.push("남편 월세 " + manwon(h.rentH) + " → <b>" + H + "</b> · 총급여 " +
+        (h.husband.gross <= 55000000 ? "5,500만원 이하 17%" : "15%") + " 구간");
     }
+    if (h.rentW > 0 && !h.rentEligible) {
+      items.push("아내 월세 " + manwon(h.rentW) + "도 무주택 세대주·세대원 요건을 체크해야 공제됩니다.");
+    } else if (h.rentW > 0) {
+      items.push("아내 월세 " + manwon(h.rentW) + " → <b>" + W + "</b> · 총급여 " +
+        (h.wife.gross <= 55000000 ? "5,500만원 이하 17%" : "15%") + " 구간 (각자 1,000만원 한도)");
+    }
+
+    if (h.postpartum > 0) {
+      items.push("산후조리원비 " + manwon(h.postpartum) + "을 의료비에 포함했습니다 (출산 " + h.births +
+        "회 · 1회당 200만원 한도, 일반 의료비 700만원과 별도)");
+    }
+
+    if (h.housing.eligible && out.optimal) {
+      var hp = out.optimal.husband.housing;
+      var hpW = out.optimal.wife && out.optimal.wife.housing;
+      var usedHousing = (hp && hp.total > 0) ? hp : (hpW || hp || { total: 0 });
+      if (usedHousing.total > 0) {
+        var parts = [];
+        if (usedHousing.savings) parts.push("청약저축 " + manwon(usedHousing.savings));
+        if (usedHousing.rentLoan) parts.push("전세대출 " + manwon(usedHousing.rentLoan));
+        if (usedHousing.mortgage) parts.push("주담대 이자 " + manwon(usedHousing.mortgage));
+        items.push("주택자금 소득공제 " + manwon(usedHousing.total) + " → <b>" +
+          (h.housing.owner === 0 ? H : W) + "</b> · " + parts.join(" + "));
+      }
+    } else if (h.housing.savings + h.housing.rentLoan + h.housing.mortgageInterest > 0) {
+      items.push("주택자금 금액을 입력했지만 <b>세대주 요건</b>을 체크하지 않아 소득공제에서 제외했습니다.");
+    }
+
+    [0, 1].forEach(function (who) {
+      var per = who === 0 ? out.optimal.husband : out.optimal.wife;
+      if (!per) return;
+      if (per.personal.woman) {
+        items.push((who === 0 ? H : W) + " 부녀자 공제 <b>" + manwon(per.personal.woman) +
+          "</b> (종합소득 3,000만원 이하·배우자 또는 부양가족 있음)");
+      }
+      if (per.smeExemption > 0) {
+        items.push((who === 0 ? H : W) + " 중소기업 취업자 소득세 감면 <b>" + manwon(per.smeExemption) +
+          "</b> (산출세액의 " + (per.input.sme === "youth" ? "90%" : "70%") + ", 연 200만원 한도)");
+      }
+      var conv = per.card.cultureConverted || 0;
+      if (conv > 0) {
+        items.push((who === 0 ? H : W) + " 문화체육 사용액 " + manwon(conv) +
+          "은 총급여 7,000만원 초과로 <b>신용카드 15%</b>로 계산했습니다.");
+      }
+    });
 
     if (h.donation > 0) {
       items.push("기부금 " + manwon(h.donation) + " → <b>" + (a.donationOwner === 0 ? H : W) + "</b>");
@@ -380,7 +440,8 @@
     rows.push(["근로소득금액", won(p.earnedIncome), ""]);
     rows.push(["인적공제", "-" + won(p.personal.total), "기본공제 " + p.personal.basicCount + "명(본인 포함)" +
       (p.personal.senior ? " + 경로우대 " + won(p.personal.senior) : "") +
-      (p.personal.disabled ? " + 장애인 " + won(p.personal.disabled) + "(자녀 " + p.personal.disabledChildren + "명 포함)" : "")]);
+      (p.personal.disabled ? " + 장애인 " + won(p.personal.disabled) + "(자녀 " + p.personal.disabledChildren + "명 포함)" : "") +
+      (p.personal.woman ? " + 부녀자 " + won(p.personal.woman) : "")]);
     if (p.pensionDeduction) rows.push(["국민연금 보험료", "-" + won(p.pensionDeduction), ""]);
     if (p.healthDeduction) rows.push(["건강·장기요양·고용보험료", "-" + won(p.healthDeduction), ""]);
     if (p.cardDeductionApplied || p.cardFamily) {
@@ -390,15 +451,26 @@
       }
       rows.push(["신용카드 등 소득공제", "-" + won(p.cardDeductionApplied), cardSub]);
     }
+    if (p.housingApplied) {
+      var hs = p.housing;
+      var hParts = [];
+      if (hs.savings) hParts.push("청약 " + manwon(hs.savings));
+      if (hs.rentLoan) hParts.push("전세대출 " + manwon(hs.rentLoan));
+      if (hs.mortgage) hParts.push("주담대 " + manwon(hs.mortgage));
+      rows.push(["주택자금 소득공제", "-" + won(p.housingApplied), hParts.join(" · ")]);
+    }
     rows.push(["과세표준", won(p.taxableBase), "한계세율 " + pct(p.marginalRate)]);
     rows.push(["산출세액", won(p.calculatedTax), ""]);
+    if (p.smeExemption) rows.push(["중소기업 취업자 소득세 감면", "-" + won(p.smeExemption),
+      "산출세액의 " + pct(p.input.sme === "youth" ? 0.9 : 0.7) + " (연 200만원 한도)"]);
     if (c.earnedIncome) rows.push(["근로소득세액공제", "-" + won(c.earnedIncome), ""]);
     if (c.child) rows.push(["자녀세액공제", "-" + won(c.child), ""]);
     if (c.pension) rows.push(["연금계좌 세액공제", "-" + won(c.pension),
       "연금저축 " + manwon(p.bases.pension.savings) + " + IRP·DC " + manwon(p.bases.pension.irp) +
       " × " + pct(p.bases.pensionRate)]);
     if (c.insurance) rows.push(["보장성보험 세액공제", "-" + won(c.insurance), ""]);
-    if (c.medical) rows.push(["의료비 세액공제", "-" + won(c.medical), "공제대상 " + manwon(p.bases.medical) + " (문턱 " + manwon(p.bases.medicalThreshold) + ")"]);
+    if (c.medical) rows.push(["의료비 세액공제", "-" + won(c.medical), "공제대상 " + manwon(p.bases.medical) + " (문턱 " + manwon(p.bases.medicalThreshold) + ")" +
+      (p.bases.postpartum ? " · 산후조리원 " + manwon(p.bases.postpartum) + " 포함" : "")]);
     if (c.education) rows.push(["교육비 세액공제", "-" + won(c.education), "공제대상 " + manwon(p.bases.education)]);
     if (c.donation) rows.push(["기부금 세액공제", "-" + won(c.donation), ""]);
     if (c.rent) rows.push(["월세 세액공제", "-" + won(c.rent), "월세 " + manwon(p.bases.rent) + " × " + pct(p.bases.rentRate)]);
@@ -422,8 +494,6 @@
       }).join("") +
       "</div></details>";
   }
-
-  var HOUSE_CHIP = '<p class="info-chip">주택자금 공제(주택청약저축·전세대출 원리금·주담대 이자)는 아직 반영하지 않았습니다. 해당되면 실제 환급액이 이보다 클 수 있습니다.</p>';
 
   function renderCouple(out) {
     var opt = out.optimal;
@@ -449,7 +519,6 @@
       '<p class="result-big ' + line.cls + '">' + line.big + "</p>" +
       '<p class="result-sub">' + line.sub + "</p>" +
       '<p class="result-note">' + line.note + "</p>" +
-      HOUSE_CHIP +
       '<div class="scenario-list">' +
       scenarioCard("남편에게 몰아주기", out.husbandAll, false) +
       scenarioCard("아내에게 몰아주기", out.wifeAll, false) +
@@ -461,7 +530,7 @@
       breakdownTable(opt.husband, "남편") +
       breakdownTable(opt.wife, "아내") +
       '<p class="small-note">결과는 소득세 기준이며, 결정세액의 10%인 지방소득세가 함께 정산됩니다. ' +
-      "입력하지 않은 공제(주택자금·청약저축 등)는 반영되지 않았습니다.</p>" +
+      "소기업·소상공인 공제부금, 우리사주, 외국납부세액, 혼인·출산·입양 세액공제, 난임시술비·미숙아 우대공제율은 반영하지 않았습니다.</p>" +
       "</div>";
   }
 
@@ -474,13 +543,12 @@
       '<p class="result-big ' + line.cls + '">' + line.big + "</p>" +
       '<p class="result-sub">' + line.sub + "</p>" +
       '<p class="result-note">' + line.note + "</p>" +
-      HOUSE_CHIP +
       '<div class="plan" style="margin-top:14px"><h3>적용된 공제</h3><ul>' +
       singlePlan(out).map(function (t) { return "<li>" + t + "</li>"; }).join("") +
       "</ul></div>" +
       breakdownTable(p, "본인") +
       '<p class="small-note">결과는 소득세 기준이며, 결정세액의 10%인 지방소득세가 함께 정산됩니다. ' +
-      "입력하지 않은 공제(주택자금·청약저축 등)는 반영되지 않았습니다.</p>" +
+      "소기업·소상공인 공제부금, 우리사주, 외국납부세액, 혼인·출산·입양 세액공제, 난임시술비·미숙아 우대공제율은 반영하지 않았습니다.</p>" +
       "</div>";
   }
 
@@ -501,11 +569,16 @@
     if (overPension > 0) items.push("연금저축·IRP 납입액 중 " + manwon(overPension) + "은 한도(연금저축 600만·합산 900만원) 초과로 공제되지 않음");
     if (p.credits.medical) items.push("의료비 세액공제 " + manwon(p.credits.medical));
     if (p.credits.education) items.push("교육비 세액공제 " + manwon(p.credits.education));
-    if (h.rent > 0 && !h.rentEligible) {
-      items.push("월세 " + manwon(h.rent) + "은 무주택 세대주 요건을 체크하지 않아 공제에서 제외");
+    if (h.rentH > 0 && !h.rentEligible) {
+      items.push("월세 " + manwon(h.rentH) + "은 무주택 세대주 요건을 체크하지 않아 공제에서 제외");
     } else if (p.credits.rent) {
-      items.push("월세 세액공제 " + manwon(p.credits.rent));
+      items.push("월세 세액공제 " + manwon(p.credits.rent) + " (월세 " + manwon(p.bases.rent) + " × " + pct(p.bases.rentRate) + ")");
     }
+    if (p.housingApplied) items.push("주택자금 소득공제 " + manwon(p.housingApplied));
+    if (h.postpartum > 0) items.push("산후조리원비 " + manwon(h.postpartum) + "을 의료비에 포함 (출산 1회당 200만원 한도)");
+    if (p.personal.woman) items.push("부녀자 공제 " + manwon(p.personal.woman));
+    if (p.smeExemption) items.push("중소기업 취업자 소득세 감면 " + manwon(p.smeExemption) + " (연 200만원 한도)");
+    if (p.card.cultureConverted) items.push("문화체육 사용액 " + manwon(p.card.cultureConverted) + "은 총급여 7,000만원 초과로 신용카드 15% 적용");
     if (p.credits.standard) items.push("표준세액공제 13만원 적용 (특별세액공제보다 유리)");
     return items;
   }
@@ -583,7 +656,7 @@
     $("tabSingle").setAttribute("aria-selected", String(!couple));
     $("tabCouple").classList.toggle("is-active", couple);
     $("tabCouple").setAttribute("aria-selected", String(couple));
-    ["wifeCol", "wifeCardCol", "wifePensionCol"].forEach(function (id) {
+    ["wifeCol", "wifeCardCol", "wifePensionCol", "wifeTaxCol"].forEach(function (id) {
       var el = $(id);
       if (el) el.hidden = !couple;
     });
@@ -592,8 +665,16 @@
     $("hName").textContent = couple ? "남편" : "본인";
     if ($("hCardName")) $("hCardName").textContent = couple ? "남편" : "본인";
     if ($("hPensionName")) $("hPensionName").textContent = couple ? "남편" : "본인";
+    if ($("hTaxName")) $("hTaxName").textContent = couple ? "남편" : "본인";
+    if ($("houseTarget")) {
+      var optW = $("houseTarget").querySelector('option[value="w"]');
+      if (optW) optW.hidden = !couple;
+    }
     Array.prototype.forEach.call(document.querySelectorAll(".mode-single-only"), function (el) {
       el.hidden = couple;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".mode-couple-only"), function (el) {
+      el.hidden = !couple;
     });
     /* 예시 상태에서 모드를 바꾸면 그 모드에 맞는 예시로 다시 채웁니다.
        (맞벌이 예시의 자녀·카드 값이 1인 모드에 남지 않도록) */
@@ -610,7 +691,9 @@
     childCard: "120",
     hPensionSaving: "300", hIrp: "0", hInsurance: "72",
     wPensionSaving: "0", wIrp: "0", wInsurance: "60",
-    medUnlimited: "100", medGeneral: "200", eduSchool: "600", eduCollege: "0", donation: "0", rent: "0",
+    medUnlimited: "100", medGeneral: "200", eduSchool: "600", eduCollege: "0", donation: "0",
+    rent: "0", rentW: "0", postpartum: "0", births: "1",
+    housingSavings: "0", rentLoan: "0", mortgageInterest: "0",
     pCount: "0", pSenior: "0", pDisabled: "0",
     __children: [{ birthYear: 2012, school: "school" }, { birthYear: 2015, school: "school" }]
   };
@@ -619,13 +702,29 @@
     hCardCredit: "1,200", hCardCheck: "400", hCardTraditional: "40", hCardTransit: "50", hCardCulture: "0",
     childCard: "0",
     hPensionSaving: "200", hIrp: "0", hInsurance: "60",
-    medUnlimited: "50", medGeneral: "0", eduSchool: "0", eduCollege: "0", donation: "0", rent: "0",
+    medUnlimited: "50", medGeneral: "0", eduSchool: "0", eduCollege: "0", donation: "0",
+    rent: "0", rentW: "0", postpartum: "0", births: "1",
+    housingSavings: "0", rentLoan: "0", mortgageInterest: "0",
     pCount: "0", pSenior: "0", pDisabled: "0",
     __children: []
   };
 
   function allInputIds() {
-    return MAN_FIELDS.concat(WON_FIELDS).concat(["pCount", "pSenior", "pDisabled"]);
+    return MAN_FIELDS.concat(WON_FIELDS).concat(["pCount", "pSenior", "pDisabled", "births"]);
+  }
+
+  function resetExtras() {
+    $("autoInsurance").checked = true;
+    $("spouseDependent").checked = false;
+    $("singleParent").checked = false;
+    if ($("rentEligible")) $("rentEligible").checked = false;
+    if ($("housingEligible")) $("housingEligible").checked = false;
+    if ($("womanW")) $("womanW").checked = false;
+    if ($("womanSingle")) $("womanSingle").checked = false;
+    if ($("smeH")) $("smeH").value = "none";
+    if ($("smeW")) $("smeW").value = "none";
+    if ($("houseTarget")) $("houseTarget").value = "h";
+    if ($("mortgageType")) $("mortgageType").value = "none";
   }
 
   function applyDemo(nextMode) {
@@ -639,10 +738,7 @@
       if (id.charAt(0) === "_") return;
       if ($(id)) $(id).value = src[id];
     });
-    $("autoInsurance").checked = true;
-    $("spouseDependent").checked = false;
-    $("singleParent").checked = false;
-    if ($("rentEligible")) $("rentEligible").checked = false;
+    resetExtras();
     var box = $("children");
     box.innerHTML = "";
     (src.__children || []).forEach(function (c) {
@@ -659,9 +755,8 @@
       var el = $(id);
       if (el) el.value = "0";
     });
-    $("spouseDependent").checked = false;
-    $("singleParent").checked = false;
-    if ($("rentEligible")) $("rentEligible").checked = false;
+    $("births").value = "1";
+    resetExtras();
     $("children").innerHTML = "";
     applying = false;
     isDemo = false;

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>계산 엔진 자체 검증 · 건보료·피부양자 계산기</title>
+<style>
+  body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;margin:0;padding:24px;background:#f5f7fb;color:#16202e}
+  h1{font-size:20px;margin:0 0 4px}
+  p.sub{margin:0 0 18px;color:#5d6b7f;font-size:13px}
+  .box{background:#fff;border:1px solid #e4e9f1;border-radius:14px;padding:16px;max-width:1080px}
+  .sum{font-size:16px;font-weight:800;margin-bottom:10px}
+  .ok{color:#0b7a53}.fail{color:#b42318}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th,td{padding:7px 8px;border-bottom:1px solid #eef1f6;text-align:left;vertical-align:top}
+  th{background:#f7f9fd;font-size:12px;color:#43506a;position:sticky;top:0}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.bad td{background:#fff4f3}
+  .tag{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px}
+  .tag.ok{background:#e9f7f1;color:#0b7a53}
+  .tag.fail{background:#fdeceb;color:#b42318}
+  code{background:#f1f4fa;padding:1px 4px;border-radius:4px;font-size:11px}
+</style>
+</head>
+<body>
+<h1>계산 엔진 자체 검증 — 건보료·피부양자</h1>
+<p class="sub">calc.js를 브라우저에서 실행해 기획안 샘플 검산 8건, 경계값 25건, 지역보험료 산식(점수표·1억 공제·전월세 평가·상하한·장기요양), 부양요건·자료 연도·역산을 확인합니다. 기준일 2026년 11월 22일.</p>
+<div class="box">
+  <div class="sum" id="summary">실행 중…</div>
+  <table>
+    <thead><tr><th>#</th><th>검증 항목</th><th>기대값</th><th>계산값</th><th>결과</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+<script src="../calc.js"></script>
+<script src="selftest.js"></script>
+</body>
+</html>

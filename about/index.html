@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>딱셈 소개 — 무료 연말정산·월급 계산기 | 운영 원칙과 공식 출처</title>
-<meta name="description" content="딱셈은 2026년 귀속 연말정산과 2027년 월급 실수령액을 브라우저에서 바로 계산하는 무료 생활 금융 계산기입니다. 만든 이유, 계산 원칙과 공식 출처(국세청·기획재정부·보건복지부·고용노동부·법제처), 갱신 방식, 모의계산의 한계와 문의 방법을 안내합니다.">
+<title>딱셈 소개 — 무료 연말정산·월급·건보료 계산기 | 운영 원칙과 공식 출처</title>
+<meta name="description" content="딱셈은 2026년 귀속 연말정산, 2027년 월급 실수령액, 건강보험 피부양자·지역건보료를 브라우저에서 바로 계산하는 무료 생활 금융 계산기입니다. 만든 이유, 계산 원칙과 공식 출처(국세청·기획재정부·보건복지부·고용노동부·법제처), 갱신 방식, 모의계산의 한계와 문의 방법을 안내합니다.">
 <meta name="keywords" content="딱셈, 딱셈 소개, 연말정산 계산기, 월급 실수령액 계산기, 계산기 출처, 국세청, 4대보험 요율, 모의계산">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="딱셈">
@@ -35,7 +35,7 @@
       "name": "딱셈 소개",
       "url": "https://ddaksem.kr/about/",
       "inLanguage": "ko-KR",
-      "description": "딱셈은 2026년 귀속 연말정산과 2027년 월급 실수령액을 브라우저에서 바로 계산하는 무료 생활 금융 계산기입니다. 계산 원칙, 공식 출처, 갱신 방식과 한계를 안내합니다.",
+      "description": "딱셈은 2026년 귀속 연말정산, 2027년 월급 실수령액, 건강보험 피부양자·지역건보료를 브라우저에서 바로 계산하는 무료 생활 금융 계산기입니다. 계산 원칙, 공식 출처, 갱신 방식과 한계를 안내합니다.",
       "isPartOf": { "@type": "WebSite", "name": "딱셈", "url": "https://ddaksem.kr/" },
       "publisher": { "@id": "https://ddaksem.kr/#organization" },
       "mainEntity": { "@id": "https://ddaksem.kr/#organization" }
@@ -67,7 +67,8 @@
       </a>
       <nav class="calc-switch" aria-label="계산기 선택">
         <a class="calc-tab" href="../">연말정산</a>
-        <a class="calc-tab" href="../salary/">월급·이직 비교</a>
+        <a class="calc-tab" href="../salary/"><span class="tab-full">월급·이직 비교</span><span class="tab-short">월급</span></a>
+        <a class="calc-tab" href="../health/"><span class="tab-full">건보료·피부양자</span><span class="tab-short">건보료</span></a>
       </nav>
     </div>
     <div class="head-right">
@@ -87,7 +88,7 @@
     <p class="eyebrow">사이트 소개 · 최근 업데이트 2026년 11월 22일</p>
     <h1>딱셈은 어떤 사이트인가요?</h1>
     <p class="lede">
-      딱셈(딱 떨어지는 셈)은 <strong>연말정산</strong>과 <strong>월급 실수령액</strong>처럼 매년 기준이 바뀌는
+      딱셈(딱 떨어지는 셈)은 <strong>연말정산</strong>·<strong>월급 실수령액</strong>·<strong>건보료</strong>처럼 매년 기준이 바뀌는
       돈 계산을, 회원가입 없이 모바일과 PC에서 바로 해 볼 수 있게 만든 <strong>무료 생활 금융 계산기</strong>입니다.
       이 페이지에는 무엇을 근거로 계산하는지, 매년 어떻게 갱신하는지, 어디까지 믿고 쓸 수 있는지를
       숨기지 않고 적었습니다.
@@ -192,7 +193,7 @@
 
   <section id="tools" class="wrap prose">
     <h2>지금 제공 중인 도구</h2>
-    <p>두 계산기 모두 설치·회원가입 없이 바로 쓸 수 있고, 입력한 값은 브라우저 밖으로 나가지 않습니다.</p>
+    <p>세 계산기 모두 설치·회원가입 없이 바로 쓸 수 있고, 입력한 값은 브라우저 밖으로 나가지 않습니다.</p>
     <div class="tool-grid">
       <a class="tool-card" href="../">
         <span class="tool-tag">2026년 귀속 · 2027년 1~2월 정산 기준</span>
@@ -209,6 +210,15 @@
         <p>
           2027년 국민연금 5.0%, 건강보험 7.19%, 장기요양 13.90% 등 달라진 4대보험 요율을 반영해 월 실수령액이
           2026년보다 얼마나 달라지는지 보여 주고, 이직 제안 연봉의 세후 인상률과 퇴직금 차이까지 비교합니다.
+        </p>
+        <span class="tool-go">계산하러 가기 →</span>
+      </a>
+      <a class="tool-card" href="../health/">
+        <span class="tool-tag">2027년 요율 · 2026. 9. 28. 시행 규칙 기준</span>
+        <h3>건강보험 피부양자 탈락 · 지역건보료 계산기</h3>
+        <p>
+          부모님·배우자를 피부양자로 올려둔 경우, 소득 2,000만원과 재산세 과표 5.4억·9억 기준으로 유지·탈락을
+          판정하고 탈락하면 매달 내는 지역건보료(소득분·재산분·장기요양)를 계산합니다.
         </p>
         <span class="tool-go">계산하러 가기 →</span>
       </a>
@@ -309,7 +319,7 @@
 <footer class="site-foot">
   <div class="wrap">
     <p class="foot-note"><strong>딱셈</strong> · 모든 계산은 브라우저 안에서만 처리되며 입력값은 저장·전송되지 않습니다. · <a href="../privacy/">개인정보처리방침</a></p>
-    <p class="foot-links"><a href="../">연말정산 계산기</a><span>·</span><a href="../salary/">월급·이직 비교</a><span>·</span><a href="./" aria-current="page">딱셈 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 22.</p>
+    <p class="foot-links"><a href="../">연말정산 계산기</a><span>·</span><a href="../salary/">월급·이직 비교</a><span>·</span><a href="../health/">건보료·피부양자</a><span>·</span><a href="./" aria-current="page">딱셈 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 22.</p>
   </div>
 </footer>
 </body>

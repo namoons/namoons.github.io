@@ -41,7 +41,8 @@
       </a>
       <nav class="calc-switch" aria-label="계산기 선택">
         <a class="calc-tab is-active" href="./" aria-current="page">연말정산</a>
-        <a class="calc-tab" href="salary/">월급·이직 비교</a>
+        <a class="calc-tab" href="salary/"><span class="tab-full">월급·이직 비교</span><span class="tab-short">월급</span></a>
+        <a class="calc-tab" href="health/"><span class="tab-full">건보료·피부양자</span><span class="tab-short">건보료</span></a>
       </nav>
     </div>
     <div class="head-right">
@@ -71,6 +72,14 @@
       <li>입력값 저장·전송 없음</li>
     </ul>
   </section>
+
+  <nav class="mobile-toc" aria-label="모바일 목차">
+    <a href="#calc">계산기</a>
+    <a href="#changes">2026년 달라진 점</a>
+    <a href="#housing">주택자금 공제</a>
+    <a href="#principle">몰아주기 원리</a>
+    <a href="#faq">자주 묻는 질문</a>
+  </nav>
 
   <section id="calc" class="wrap calc-wrap" aria-label="연말정산 계산기">
     <div class="calc-main">
@@ -147,6 +156,33 @@
             <label class="check"><input id="spouseDependent" type="checkbox"> 배우자 기본공제 <em>(소득 요건 충족 · +150만 원)</em></label>
             <p class="hint" style="margin:4px 0 0">배우자의 연간 소득금액이 100만원(근로소득만 있으면 총급여 500만원) 이하일 때 체크하세요. 본인 인적공제에 150만원이 더해집니다.</p>
             <label class="check"><input id="singleParent" type="checkbox"> 한부모 공제(100만원)</label>
+          </div>
+
+          <div class="sub-block">
+            <h3>부녀자 공제 · 중소기업 취업자 감면</h3>
+            <p class="card-help">부녀자 공제는 종합소득금액 3,000만원 이하인 여성이 배우자 또는 부양가족이 있을 때 50만원입니다. 한부모 공제와 겹치면 금액이 큰 한부모 공제(100만원)만 적용됩니다. 중소기업 감면은 2026년 12월 31일까지 중소기업에 취업한 경우 청년 90%·고령·장애인·경력단절 70%, 연 200만원 한도입니다.</p>
+            <div class="grid-2 pair-grid">
+              <div class="person-col">
+                <h3 class="person-name" id="hTaxName">남편</h3>
+                <label class="check mode-single-only" hidden><input id="womanSingle" type="checkbox"> 부녀자 공제 대상 <em>(여성)</em></label>
+                <label class="field"><span class="field-label">중소기업 취업자 감면</span>
+                  <select id="smeH">
+                    <option value="none">해당 없음</option>
+                    <option value="youth">청년 90% (만 15~34세)</option>
+                    <option value="other">고령·장애인·경력단절 70%</option>
+                  </select></label>
+              </div>
+              <div class="person-col" id="wifeTaxCol">
+                <h3 class="person-name">아내</h3>
+                <label class="check"><input id="womanW" type="checkbox"> 부녀자 공제 대상 <em>(여성)</em></label>
+                <label class="field"><span class="field-label">중소기업 취업자 감면</span>
+                  <select id="smeW">
+                    <option value="none">해당 없음</option>
+                    <option value="youth">청년 90% (만 15~34세)</option>
+                    <option value="other">고령·장애인·경력단절 70%</option>
+                  </select></label>
+              </div>
+            </div>
           </div>
         </fieldset>
 
@@ -239,13 +275,50 @@
               <span class="input-wrap"><input id="donation" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span>
             </label>
             <label class="field">
-              <span class="field-label">월세액 <em>(연 1,000만원 한도)</em></span>
+              <span class="field-label">산후조리원비 <em>(출산 1회당 200만원 한도)</em></span>
+              <span class="input-wrap"><input id="postpartum" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span>
+            </label>
+            <label class="field">
+              <span class="field-label">출산 횟수 <em>(산후조리원 한도)</em></span>
+              <span class="input-wrap"><input id="births" type="text" inputmode="numeric" value="1"><span class="unit">회</span></span>
+            </label>
+            <label class="field">
+              <span class="field-label">월세액 — 남편(본인) <em>(연 1,000만원 한도)</em></span>
               <span class="input-wrap"><input id="rent" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span>
             </label>
+            <label class="field mode-couple-only">
+              <span class="field-label">월세액 — 아내 <em>(각자 1,000만원 한도)</em></span>
+              <span class="input-wrap"><input id="rentW" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span>
+            </label>
           </div>
-          <label class="check"><input id="rentEligible" type="checkbox"> 무주택 세대주 요건 충족 <em>(또는 요건을 갖춘 배우자)</em></label>
-          <p class="hint">의료비는 총급여의 3%를 넘는 금액부터 15%가 공제됩니다. 월세는 <strong>무주택 세대주</strong>만 대상이라 위 요건을 체크해야 공제에 반영됩니다. 체크하지 않으면 월세를 입력해도 세액공제는 0원입니다.</p>
+          <label class="check"><input id="rentEligible" type="checkbox"> 무주택 세대주·세대원 요건 충족 <em>(배우자 각자 공제 포함)</em></label>
+          <p class="hint">의료비는 총급여의 3%를 넘는 금액부터 15%가 공제됩니다. 산후조리원비는 출산 1회당 200만원까지 일반 의료비(700만원 한도)와 별도로 더해집니다. 월세는 <strong>무주택 세대주·세대원</strong>만 대상이라 위 요건을 체크해야 공제에 반영됩니다. 체크하지 않으면 월세를 입력해도 세액공제는 0원입니다.</p>
           <p class="hint mode-single-only" id="medicalSingleNote" hidden><strong>의료비·보장성보험료는 본인 + 기본공제 대상 가족(배우자·자녀·부모님) 합산 금액</strong>을 입력하세요. 교육비는 기본공제 대상 자녀만 공제되며, <strong>부모님 교육비는 공제되지 않습니다.</strong></p>
+        </fieldset>
+
+        <!-- 주택자금 -->
+        <fieldset class="card" id="housingCard">
+          <legend class="card-title"><span class="step">6</span> 주택자금 (청약저축·전세대출·주담대)</legend>
+          <p class="card-help">무주택 세대주(주담대는 무주택 또는 1주택 세대주) 요건이 있어야 공제됩니다. 청약저축은 총급여 7,000만원 이하만 대상이고, 전세대출과 합쳐 400만원, 주담대는 상환조건별 600만~2,000만원이 한도입니다.</p>
+          <div class="grid-3">
+            <label class="field"><span class="field-label">주택청약종합저축 납입액 <em>(300만원의 40%)</em></span><span class="input-wrap"><input id="housingSavings" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">전세자금대출 원리금 <em>(40%, 청약과 합산 400만원)</em></span><span class="input-wrap"><input id="rentLoan" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">주담대 이자상환액</span><span class="input-wrap"><input id="mortgageInterest" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+          </div>
+          <div class="grid-2">
+            <label class="field"><span class="field-label">주담대 상환조건 (연 한도)</span>
+              <select id="mortgageType">
+                <option value="none">해당 없음</option>
+                <option value="m15_fixed_nod">15년 이상 · 고정금리 + 비거치 (2,000만원)</option>
+                <option value="m15_one">15년 이상 · 고정금리 또는 비거치 (1,800만원)</option>
+                <option value="m15_none">15년 이상 · 둘 다 아님 (800만원)</option>
+                <option value="m10_one">10~15년 · 고정금리 또는 비거치 (600만원)</option>
+              </select></label>
+            <label class="field"><span class="field-label">공제 받을 사람</span>
+              <select id="houseTarget"><option value="h">남편(본인)</option><option value="w">아내</option></select></label>
+          </div>
+          <label class="check"><input id="housingEligible" type="checkbox"> 무주택(주담대는 1주택 포함) 세대주 요건 충족</label>
+          <p class="hint">청약저축·전세대출·주담대는 한 사람에게만, 실제 대출·납입 명의자에게 넣어 주세요. 카드 소득공제와 합쳐 연 2,500만원까지만 소득공제됩니다.</p>
         </fieldset>
 
         <div class="form-foot">
@@ -299,7 +372,40 @@
     </div>
   </section>
 
-  <!-- 원리 -->
+  <!-- 주택자금 -->
+  <section id="housing" class="wrap prose">
+    <h2>주택자금 공제 — 청약저축·전세대출·주담대</h2>
+    <p>
+      직장인이 놓치기 쉬운 소득공제가 주택자금입니다. 세 가지 모두 <strong>무주택 세대주</strong> 요건이 기본이고,
+      주담대는 1주택 세대주까지 인정됩니다. 세액공제가 아니라 <strong>소득공제</strong>라서, 세율이 높은 사람이 받을 때
+      줄어드는 세금이 더 큽니다. 카드 소득공제와 합쳐 연 2,500만원까지만 인정됩니다.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">주택자금 공제 3종의 요건과 한도</caption>
+        <thead>
+          <tr><th scope="col">항목</th><th scope="col">요건</th><th scope="col">공제액</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">주택청약종합저축</th><td data-label="요건">무주택 세대주, 총급여 7,000만원 이하</td><td data-label="공제액">납입액 300만원 한도 × 40% = 최대 120만원</td></tr>
+          <tr><th scope="row">전세자금대출 원리금</th><td data-label="요건">무주택 세대주, 국민주택규모 이하</td><td data-label="공제액">원리금 × 40%, 청약과 합쳐 400만원 한도</td></tr>
+          <tr><th scope="row">주담대 이자</th><td data-label="요건">무주택·1주택 세대주, 취득 당시 기준시가 6억원 이하</td><td data-label="공제액">이자 전액, 상환조건별 600만~2,000만원 한도</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <h3>주담대 한도는 대출 계약서의 세 가지로 갈립니다</h3>
+      <ul>
+        <li><strong>15년 이상 + 고정금리 + 비거치식 분할상환</strong> → 2,000만원</li>
+        <li><strong>15년 이상 + 고정금리 또는 비거치식</strong> → 1,800만원</li>
+        <li><strong>15년 이상 + 둘 다 아님</strong> → 800만원</li>
+        <li><strong>10년 이상 15년 미만 + 고정금리 또는 비거치식</strong> → 600만원</li>
+      </ul>
+      <p>고정금리는 대출금의 70% 이상을 상환기간 동안 고정금리로 내는 방식, 비거치식은 이자만 내는 기간이 1년 이내이고
+        매년 정해진 금액 이상 원금을 갚는 방식입니다. 어느 쪽인지는 은행의 이자상환증명서와 약정서로 확인하세요.</p>
+    </div>
+  </section>
+
   <section id="principle" class="wrap prose">
     <h2>맞벌이 ‘몰아주기’, 무엇을 누구에게 넘길 수 있나</h2>
     <p>
@@ -452,11 +558,42 @@
           적용하고, 어느 쪽을 적용했는지 표시합니다.</p>
       </details>
       <details>
+        <summary>주택청약저축 소득공제는 누가 받을 수 있나요?</summary>
+        <p>무주택 세대주(또는 요건을 갖춘 배우자)이면서 총급여 7,000만원 이하일 때, 납입액 300만원의 40%인 최대
+          120만원을 소득공제받습니다. 총급여가 7,000만원을 넘으면 청약저축 공제는 없고, 전세자금대출 공제는
+          계속 받을 수 있습니다. 청약저축을 300만원 넘게 넣어도 300만원까지만 인정됩니다.</p>
+      </details>
+      <details>
+        <summary>전세자금대출·주담대 이자는 얼마까지 공제되나요?</summary>
+        <p>전세자금대출 원리금은 40%, 청약저축과 합쳐 연 400만원까지입니다. 주담대 이자는 이자 전액을
+          상환조건별 한도(15년 이상 고정금리+비거치 2,000만원, 15년 이상 고정금리 또는 비거치 1,800만원,
+          15년 이상 둘 다 아님 800만원, 10~15년 고정금리 또는 비거치 600만원)까지 공제합니다.
+          모두 무주택 세대주 요건이 있고, 주담대는 취득 당시 기준시가 6억원 이하 주택이어야 합니다.</p>
+      </details>
+      <details>
+        <summary>부녀자 공제와 한부모 공제를 같이 받을 수 있나요?</summary>
+        <p>안 됩니다. 부녀자 공제(50만원)는 종합소득금액 3,000만원 이하인 여성이 배우자 또는 부양가족이 있을 때,
+          한부모 공제(100만원)는 배우자가 없고 부양가족이 있을 때 받습니다. 둘 다 해당하면 금액이 큰
+          한부모 공제만 적용됩니다. 이 계산기도 유리한 쪽 하나만 반영합니다.</p>
+      </details>
+      <details>
+        <summary>중소기업 취업자 소득세 감면은 얼마인가요?</summary>
+        <p>2026년 12월 31일까지 중소기업에 취업했다면, 청년(만 15~34세)은 소득세의 90%를 5년간, 60세 이상·장애인·
+          경력단절여성은 70%를 3년간 감면받습니다. 어느 쪽이든 연 200만원이 한도입니다. 감면은 산출세액에서
+          먼저 빼고, 남은 세액에서 근로소득세액공제·특별세액공제를 적용합니다.</p>
+      </details>
+      <details>
+        <summary>산후조리원비도 의료비로 공제되나요?</summary>
+        <p>2024년 이후 지출분부터 출산 1회당 200만원까지 의료비 세액공제 대상에 들어갑니다. 과거의 총급여
+          7,000만원 이하 요건은 없어졌지만, 다른 의료비와 합쳐 총급여의 3%를 넘는 금액에 15%를 적용하는
+          구조는 같습니다. 일반 의료비 700만원 한도와는 별도로 계산합니다.</p>
+      </details>
+      <details>
         <summary>계산 결과와 회사 연말정산이 왜 다른가요?</summary>
-        <p>이 계산기는 입력한 항목만 반영합니다. 주택자금(전세대출·주택담보대출 이자), 주택청약저축, 소기업·소상공인
-          공제부금, 우리사주, 외국납부세액, 중도입·퇴사, 부양가족의 소득요건 같은 항목은 빠져 있습니다.
-          또 회사는 간이세액표로 미리 뗀 세금을 기준으로 정산하므로, 기납부세액을 정확히 넣어야 환급액이
-          맞습니다. 결과는 참고용으로만 사용하세요.</p>
+        <p>이 계산기는 입력한 항목만 반영합니다. 소기업·소상공인 공제부금, 우리사주, 외국납부세액, 혼인·출산·입양
+          세액공제, 난임시술비·미숙아 의료비 우대공제율 같은 항목은 아직 빠져 있습니다. 또 회사는 간이세액표로
+          미리 뗀 세금을 기준으로 정산하므로, 기납부세액을 정확히 넣어야 환급액이 맞습니다. 결과는 참고용으로만
+          사용하세요.</p>
       </details>
       <details>
         <summary>지방소득세도 계산에 포함되나요?</summary>
@@ -489,9 +626,11 @@
       정확한 세액은 홈택스 연말정산 미리보기나 세무 전문가의 확인을 받으세요.
     </p>
     <p class="muted">
-      기준일 2026년 11월 21일 · 계산 항목: 근로소득공제, 인적공제, 연금보험료·건강보험료, 신용카드 등 소득공제,
-      기본세율, 근로소득세액공제, 자녀세액공제, 연금계좌·보장성보험·의료비·교육비·기부금·월세 세액공제, 표준세액공제.
-      반영하지 않은 항목: 주택자금 공제, 주택청약종합저축, 소기업·소상공인 공제부금, 우리사주, 외국납부세액, 혼인·출산·입양 세액공제, 부녀자 공제, 난임시술비·미숙아 의료비 우대공제율.
+      기준일 2026년 11월 21일 · 계산 항목: 근로소득공제, 인적공제(기본·경로우대·장애인·한부모·부녀자), 연금보험료·건강보험료,
+      신용카드 등 소득공제, 주택자금(청약저축·전세대출·주담대 이자), 기본세율, 근로소득세액공제, 자녀세액공제, 중소기업 취업자 감면,
+      연금계좌·보장성보험·의료비(산후조리원 포함)·교육비·기부금·월세 세액공제, 표준세액공제.
+      반영하지 않은 항목: 소기업·소상공인 공제부금, 우리사주, 외국납부세액, 혼인·출산·입양 세액공제, 난임시술비·미숙아 우대공제율.
+      주택자금은 입력한 사람에게만 적용되며, 공제 받을 사람을 바꿔 최적 배분을 찾지는 않습니다.
     </p>
   </section>
 
@@ -509,7 +648,7 @@
 <footer class="site-foot">
   <div class="wrap">
     <p class="foot-note"><strong>딱셈</strong> · 모든 계산은 브라우저 안에서만 처리되며 입력값은 저장·전송되지 않습니다. · <a href="privacy/">개인정보처리방침</a></p>
-    <p class="foot-links"><a href="./">연말정산 계산기</a><span>·</span><a href="salary/">월급·이직 비교</a><span>·</span><a href="about/">딱셈 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 22.</p>
+    <p class="foot-links"><a href="./">연말정산 계산기</a><span>·</span><a href="salary/">월급·이직 비교</a><span>·</span><a href="health/">건보료·피부양자</a><span>·</span><a href="about/">딱셈 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 22.</p>
   </div>
 </footer>
 

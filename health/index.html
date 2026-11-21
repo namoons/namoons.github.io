@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2027 건강보험 피부양자 탈락 계산기 | 소득 2,000만·재산 5.4억·지역건보료 모의계산 — 딱셈</title>
+<meta name="description" content="부모님·배우자를 피부양자로 올려둔 경우, 소득 2,000만원·재산세 과표 5.4억/9억 기준으로 탈락 여부와 탈락 시 월 지역건보료(소득분+재산분+장기요양)를 계산합니다. 2027년 요율 반영.">
+<meta name="keywords" content="건강보험 피부양자 탈락, 피부양자 소득 기준 2027, 피부양자 재산 5.4억, 지역가입자 보험료 계산, 부모님 건강보험료, 피부양자 사업소득 500만, 지역건보료 계산기">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="딱셈">
+<meta name="theme-color" content="#1d4ed8">
+<link rel="canonical" href="https://ddaksem.kr/health/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="딱셈">
+<meta property="og:title" content="2027 건강보험 피부양자 탈락·지역건보료 계산기">
+<meta property="og:description" content="소득 2,000만원, 재산세 과표 5.4억·9억. 탈락하면 매달 얼마인지 3분 안에 확인합니다. 2027년 요율 반영.">
+<meta property="og:url" content="https://ddaksem.kr/health/">
+<meta property="og:image" content="https://ddaksem.kr/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="2027 건강보험 피부양자 탈락 계산기 — 딱셈">
+<meta name="twitter:description" content="소득·재산 기준으로 피부양자 유지/탈락과 탈락 시 월 건보료를 계산합니다.">
+<meta name="twitter:image" content="https://ddaksem.kr/og-image.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%231d4ed8'/><path d='M9.7 16.6l4.2 4.2 8.4-9.1' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a class="skip" href="#calc">계산기로 바로 가기</a>
+
+<header class="site-head">
+  <div class="wrap head-inner">
+    <div class="head-left">
+      <a class="brand" href="../" aria-label="딱셈 홈">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" focusable="false" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M9.7 16.6l4.2 4.2 8.4-9.1" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-text">딱셈</span>
+      </a>
+      <nav class="calc-switch" aria-label="계산기 선택">
+        <a class="calc-tab" href="../">연말정산</a>
+        <a class="calc-tab" href="../salary/"><span class="tab-full">월급·이직 비교</span><span class="tab-short">월급</span></a>
+        <a class="calc-tab is-active" href="./" aria-current="page"><span class="tab-full">건보료·피부양자</span><span class="tab-short">건보료</span></a>
+      </nav>
+    </div>
+    <div class="head-right">
+      <nav class="head-nav" aria-label="페이지 내 메뉴">
+        <a href="#calc">계산하기</a>
+        <a href="#criteria">피부양자 기준</a>
+        <a href="#property">재산 5.4억·9억</a>
+        <a href="#faq">자주 묻는 질문</a>
+      </nav>
+      <a class="head-about" href="../about/">딱셈 소개</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <p class="eyebrow">2027년 요율 기준 · 일부 2026년 고시값 가정 · 2026. 11. 21. 확인</p>
+    <h1>건강보험 피부양자 탈락·지역건보료 계산기</h1>
+    <p class="lede">
+      부모님·배우자를 내 건강보험에 <strong>피부양자</strong>로 올려두셨나요?
+      소득 2,000만원, 재산세 과표 5.4억·9억 기준으로 <strong>유지될지, 탈락하면 매달 얼마를 내는지</strong> 계산합니다.
+      모든 계산은 이 브라우저 안에서만 이루어지고, 입력값은 어디로도 전송되지 않습니다.
+    </p>
+    <ul class="hero-badges">
+      <li>2027년 건강보험료율 7.19%</li>
+      <li>장기요양 13.90%</li>
+      <li>입력값 저장·전송 없음</li>
+    </ul>
+  </section>
+
+  <nav class="mobile-toc" aria-label="모바일 목차">
+    <a href="#calc">계산기</a>
+    <a href="#criteria">피부양자 기준</a>
+    <a href="#property">재산 5.4억·9억</a>
+    <a href="#timing">11월 자료</a>
+    <a href="#faq">자주 묻는 질문</a>
+  </nav>
+
+  <section id="calc" class="wrap calc-wrap" aria-label="건보료·피부양자 계산기">
+    <div class="calc-main">
+
+      <div class="mode-tabs" role="tablist" aria-label="계산 종류">
+        <button type="button" id="tabDependent" class="mode-tab is-active" role="tab" aria-selected="true" aria-controls="formDependent">피부양자 탈락·지역건보료</button>
+        <button type="button" id="tabSide" class="mode-tab" role="tab" aria-selected="false" aria-controls="formSide">부업·N잡러 추가보험료</button>
+      </div>
+
+      <form id="formDependent" class="form" autocomplete="off" novalidate>
+        <div class="example-row" aria-label="예시 불러오기">
+          <span class="example-label">예시:</span>
+          <button type="button" class="btn-mini" data-example="keep">부모 소득0·재산4억</button>
+          <button type="button" class="btn-mini" data-example="income">연금 2,400만</button>
+          <button type="button" class="btn-mini" data-example="property">재산6억·소득1,100만</button>
+          <button type="button" class="btn-mini" data-example="border">경계: 소득 1,950만</button>
+          <button type="button" class="btn-mini" data-example="edge">경계값: 2,000만·5.4억</button>
+          <button type="button" class="btn-mini" data-example="sibling">형제자매 재산 1.8억</button>
+        </div>
+
+        <!-- 1. 부양요건 -->
+        <fieldset class="card">
+          <legend class="card-title"><span class="step">1</span> 누구를 피부양자로 두고 있나요?</legend>
+          <p class="card-help">건강보험 피부양자는 <strong>부양요건·소득요건·재산요건</strong>을 모두 충족해야 합니다. 형제자매를 빼면 나이 제한이 없습니다(부모 60세·자녀 20세는 연말정산 기준입니다).</p>
+          <div class="grid-2">
+            <label class="field"><span class="field-label">직장가입자(나)와의 관계</span>
+              <select id="relation">
+                <option value="parent">부모님(직계존속)</option>
+                <option value="spouse">배우자</option>
+                <option value="child">자녀(직계비속)</option>
+                <option value="grandparent">조부모·외조부모</option>
+                <option value="grandchild">손자녀·외손자녀</option>
+                <option value="childSpouse">사위·며느리</option>
+                <option value="spouseParent">배우자의 부모</option>
+                <option value="spouseChild">배우자의 자녀</option>
+                <option value="sibling">형제자매</option>
+              </select></label>
+            <label class="field" data-sup="age"><span class="field-label">나이</span>
+              <span class="input-wrap"><input id="age" type="text" inputmode="numeric" value="68"><span class="unit">세</span></span></label>
+            <label class="field" data-sup="marital"><span class="field-label">혼인 상태</span>
+              <select id="marital">
+                <option value="single">미혼</option>
+                <option value="married">기혼</option>
+                <option value="ended">이혼·사별</option>
+              </select></label>
+          </div>
+          <label class="check"><input id="sameHousehold" type="checkbox" checked> 같은 주소에 함께 살고 있음 <em>(동거)</em></label>
+
+          <div class="sub-block" data-sup="siblingParent">
+            <h3>비동거 부모·배우자 부모의 추가 확인</h3>
+            <label class="check"><input id="siblingWithParent" type="checkbox"> 그 부모님과 동거하는 형제자매가 있음</label>
+            <label class="check"><input id="siblingWithParentIncome" type="checkbox"> 그 형제자매에게 보수·소득이 있음</label>
+            <p class="hint">비동거 부모는 함께 사는 형제자매가 없거나, 있어도 소득이 없어야 인정됩니다.</p>
+          </div>
+
+          <div class="sub-block" data-sup="parent">
+            <h3>후보자의 부모 확인</h3>
+            <label class="check"><input id="parentExists" type="checkbox" checked> 후보자의 부모가 있음</label>
+            <label class="check"><input id="parentIncome" type="checkbox"> 그 부모에게 보수·소득이 있음</label>
+          </div>
+
+          <div class="sub-block" data-sup="child">
+            <h3>후보자의 자녀 확인 <em>(이혼·사별인 경우)</em></h3>
+            <label class="check"><input id="childExists" type="checkbox" checked> 후보자의 자녀가 있음</label>
+            <label class="check"><input id="childIncome" type="checkbox"> 그 자녀에게 보수·소득이 있음</label>
+          </div>
+
+          <div class="sub-block" data-sup="sibling">
+            <h3>비동거 형제자매의 추가 확인</h3>
+            <label class="check"><input id="siblingIncome" type="checkbox"> 직장가입자 외 다른 형제자매에게 소득이 있음</label>
+            <p class="hint">형제자매는 30세 미만·65세 이상·등록 장애인·국가유공 상이자 중 하나여야 합니다.</p>
+          </div>
+
+          <div class="sub-block">
+            <h3>장애·국가유공·의료급여</h3>
+            <label class="check"><input id="disabled" type="checkbox"> 등록 장애인</label>
+            <label class="check"><input id="veteran" type="checkbox"> 국가유공·보훈보상 상이자</label>
+            <label class="check"><input id="medicalAid" type="checkbox"> 의료급여 수급권자 <em>(피부양자 불가)</em></label>
+          </div>
+
+          <label class="field" style="max-width:320px"><span class="field-label">판정 기준월</span>
+            <select id="basisMonth">
+              <option value="11">2026년 11~12월 (2025년 소득)</option>
+              <option value="1">2026년 1~10월 (2024년 소득)</option>
+            </select></label>
+        </fieldset>
+
+        <!-- 2. 소득·재산 -->
+        <fieldset class="card">
+          <legend class="card-title"><span class="step">2</span> 그 사람의 소득과 재산</legend>
+          <p class="card-help">모두 <strong>연간, 만원 단위</strong>입니다. 비과세소득은 합계에서 빠집니다. 공적연금은 연금소득공제 없이 그해 받은 전액을 넣습니다.</p>
+          <div class="grid-3">
+            <label class="field"><span class="field-label">근로소득 <em>(총급여)</em></span><span class="input-wrap"><input id="incEarned" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">사업소득 <em>(소득금액)</em></span><span class="input-wrap"><input id="incBusiness" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">주택임대소득</span><span class="input-wrap"><input id="incRental" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">공적연금 <em>(국민·공무원연금 등)</em></span><span class="input-wrap"><input id="incPubPension" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">사적연금 <em>(연금저축·IRP)</em></span><span class="input-wrap"><input id="incPrivPension" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">이자·배당소득</span><span class="input-wrap"><input id="incInterest" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">기타소득</span><span class="input-wrap"><input id="incOther" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            <label class="field"><span class="field-label">비과세소득 <em>(합계에서 제외)</em></span><span class="input-wrap"><input id="incNonTax" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+          </div>
+          <label class="check"><input id="bizRegistered" type="checkbox"> 사업자등록이 있음</label>
+
+          <div class="sub-block" id="spouseIncomeBlock" hidden>
+            <h3>배우자 소득 <em>(기혼자는 부부 모두 충족)</em></h3>
+            <div class="grid-2">
+              <label class="field"><span class="field-label">배우자 소득 합계</span><span class="input-wrap"><input id="spouseIncome" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">소득 종류</span>
+                <select id="spouseLabor">
+                  <option value="labor">근로·연금 (지역보험료 50% 평가)</option>
+                  <option value="business">사업·기타 (100% 평가)</option>
+                </select></label>
+            </div>
+            <label class="check"><input id="spouseHasIncome" type="checkbox"> 배우자에게 소득이 있음</label>
+          </div>
+
+          <div class="sub-block">
+            <h3>재산 <em>(재산세 과세표준, 본인 지분)</em></h3>
+            <div class="grid-2">
+              <label class="field"><span class="field-label">주택 재산세 과표</span><span class="input-wrap"><input id="propHouse" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">토지·건축물·선박·항공기 과표</span><span class="input-wrap"><input id="propOther" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            </div>
+            <p class="hint">시세나 공시가격이 아니라 <strong>재산세 고지서의 과세표준</strong>입니다. 공동명의는 본인 지분만 넣으세요. 전세보증금은 피부양자 판정에 들어가지 않습니다.</p>
+          </div>
+
+          <div class="sub-block">
+            <h3>지역보험료 계산에만 쓰는 입력 <em>(선택)</em></h3>
+            <p class="hint">탈락했을 때의 지역건보료를 더 정확히 계산합니다. 판정에는 영향이 없습니다.</p>
+            <div class="grid-3">
+              <label class="field"><span class="field-label">전월세 보증금</span><span class="input-wrap"><input id="jeonseDeposit" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">월세</span><span class="input-wrap"><input id="monthlyRent" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">주택담보·전세대출 차감액</span><span class="input-wrap"><input id="loanDeduction" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">같은 세대 다른 지역가입자 소득</span><span class="input-wrap"><input id="extraIncome" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">같은 세대 다른 지역가입자 재산</span><span class="input-wrap"><input id="extraProperty" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            </div>
+            <p class="hint">재산 기본공제 1억원은 세대에 한 번, 전월세 평가는 (보증금 + 월세×40) × 30%입니다.</p>
+          </div>
+
+          <div class="form-foot">
+            <span class="muted">입력값은 저장·전송되지 않습니다.</span>
+            <div class="form-buttons">
+              <button type="button" id="resetBtn" class="btn-ghost">모두 지우기</button>
+              <button type="button" id="demoBtn" class="btn-ghost">예시 불러오기</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <form id="formSide" class="form" autocomplete="off" novalidate hidden>
+        <fieldset class="card">
+          <legend class="card-title"><span class="step">1</span> 직장가입자의 보수 외 소득</legend>
+          <p class="card-help">강의료·원고료·자문료·배당·이자처럼 근로(보수) 외에 번 돈의 <strong>연간 합계</strong>입니다. 2,000만원을 넘는 초과분에만 소득월액보험료가 붙습니다.</p>
+          <label class="field" style="max-width:360px"><span class="field-label">연 보수 외 소득</span>
+            <span class="input-wrap"><input id="sideAnnual" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+          <p class="hint">2027년 건강보험료율 7.19%, 장기요양보험료율 13.90%를 적용합니다. 다음 해 11월부터 보수월액보험료에 더해집니다.</p>
+          <div class="form-buttons" style="margin-top:12px">
+            <button type="button" id="sideReset" class="btn-ghost">모두 지우기</button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+
+    <aside class="calc-side" aria-label="계산 결과">
+      <div id="results"></div>
+    </aside>
+  </section>
+
+  <!-- 기준 -->
+  <section id="criteria" class="wrap prose">
+    <h2>피부양자, 세 가지만 넘으면 탈락합니다</h2>
+    <p>
+      건강보험 피부양자는 <strong>부양요건 + 소득요건 + 재산요건</strong>을 모두 충족해야 합니다. 하나라도 넘으면
+      그 다음 날 자격을 잃고 지역가입자로 바뀝니다. 흔히 연말정산 부양가족과 혼동하는데, 두 제도는 기준이 다릅니다.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">건강보험 피부양자와 연말정산 부양가족 비교</caption>
+        <thead><tr><th scope="col">구분</th><th scope="col">건강보험 피부양자</th><th scope="col">연말정산 부양가족</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">소득 기준</th><td data-label="건강보험">연 소득 합계 2,000만원 이하 + 사업소득 없음(예외 500만원)</td><td data-label="연말정산">연 소득금액 100만원 이하(근로소득만 있으면 총급여 500만원)</td></tr>
+          <tr><th scope="row">나이 기준</th><td data-label="건강보험"><strong>형제자매를 빼면 나이 제한 없음</strong></td><td data-label="연말정산">부모 60세 이상, 자녀 20세 이하 등</td></tr>
+          <tr><th scope="row">재산 기준</th><td data-label="건강보험">재산세 과표 5.4억원(또는 9억원) 이하</td><td data-label="연말정산">없음</td></tr>
+          <tr><th scope="row">혜택</th><td data-label="건강보험">보험료 없이 건강보험 보장</td><td data-label="연말정산">1명당 150만원 소득공제</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <h3>부양요건</h3>
+      <p>배우자는 항상 인정됩니다. 부모는 함께 살면 인정되고, 따로 살면 부모와 동거하는 형제자매가 없거나 소득이 없어야 합니다.
+        사위·며느리는 함께 살 때만, 자녀는 따로 살면 미혼일 때만 인정됩니다. 형제자매는 30세 미만·65세 이상·등록 장애인·국가유공 상이자 중 하나여야 합니다.</p>
+    </div>
+    <div class="note">
+      <h3>소득요건 — 2,000만원, 사업소득, 기혼 부부</h3>
+      <p>이자·배당·사업·근로·연금·기타소득 합계가 연 2,000만원 이하여야 합니다. 사업소득은 원칙적으로 없어야 하고,
+        사업자등록이 없거나 장애인·국가유공자이면서 500만원 이하일 때만 '없는 것'으로 봅니다. 주택임대소득은 이 예외가 적용되지 않습니다.
+        <strong>기혼자는 부부 모두</strong> 각자 2,000만원 이하를 충족해야 합니다.</p>
+      <p>이자·배당은 판정에서는 합계에 넣는 보수적인 기준을 따랐습니다. 지역보험료 계산에서는 1,000만원 이하면 합산하지 않아,
+        판정과 부과의 소득 범위가 다릅니다.</p>
+    </div>
+  </section>
+
+  <!-- 재산 -->
+  <section id="property" class="wrap prose">
+    <h2>5.4억과 9억, 무엇이 다른가</h2>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">재산세 과표 구간별 피부양자 판정</caption>
+        <thead><tr><th scope="col">재산세 과표 합계</th><th scope="col">추가 조건</th><th scope="col">판정</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">5.4억원 이하</th><td data-label="조건">없음(소득요건은 별도)</td><td data-label="판정">충족</td></tr>
+          <tr><th scope="row">5.4억원 초과 ~ 9억원 이하</th><td data-label="조건">연 소득 1,000만원 이하</td><td data-label="판정">충족</td></tr>
+          <tr><th scope="row">9억원 초과</th><td data-label="조건">소득과 무관</td><td data-label="판정"><strong>미충족</strong></td></tr>
+          <tr><th scope="row">형제자매</th><td data-label="조건">1.8억원 이하</td><td data-label="판정">충족</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      재산은 <strong>후보자 본인 명의(지분)의 재산세 과세표준</strong>입니다. 부부 합산 규정이 없고, 공동명의 주택은 각자 지분만 봅니다.
+      시세가 아니라 공시가격에 공정시장가액비율을 곱한 과세표준입니다. 2026년 1세대 1주택은 공시가격 3억 이하 43%, 3억 초과~6억 이하 44%,
+      6억 초과 45%이고, 그 외 주택은 60%입니다.
+    </p>
+    <div class="note">
+      <h3>공시가격으로 대략 환산하면</h3>
+      <p>1세대 1주택: 과표 5.4억 ≈ 공시가격 12억, 과표 9억 ≈ 공시가격 20억. 1세대 1주택이 아니면 과표 5.4억 ≈ 공시가격 9억,
+        과표 9억 ≈ 공시가격 15억입니다. 정확한 값은 재산세 고지서의 과세표준을 확인하세요.</p>
+      <p>전세보증금은 피부양자 판정에 들어가지 않지만, <strong>지역가입자 보험료</strong>의 재산 평가에는 들어갑니다.</p>
+    </div>
+  </section>
+
+  <!-- 시점 -->
+  <section id="timing" class="wrap prose">
+    <h2>11월에 자료가 바뀝니다</h2>
+    <p>
+      재산 자료는 매년 6월 1일 기준으로 그해 11월부터 다음 해 10월까지 반영됩니다. 소득 자료도 11~12월에는 전년도 소득으로 바뀝니다.
+      그래서 11월에 "부모님 건보료가 갑자기 나왔다"는 일이 생깁니다.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">보험료 부과 자료 반영 시점</caption>
+        <thead><tr><th scope="col">자료</th><th scope="col">반영 기간</th><th scope="col">쓰는 자료</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">소득(연금 외)</th><td data-label="기간">매년 1~10월</td><td data-label="자료">보험료 부과 연도의 전전년도</td></tr>
+          <tr><th scope="row">연금소득</th><td data-label="기간">매년 1~10월</td><td data-label="자료">전년도</td></tr>
+          <tr><th scope="row">소득</th><td data-label="기간">매년 11~12월</td><td data-label="자료">전년도</td></tr>
+          <tr><th scope="row">재산</th><td data-label="기간">해당 연도 11월~다음 해 10월</td><td data-label="자료">해당 연도 6월 1일 재산세 과세자료</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 탈락하면 -->
+  <section id="cost" class="wrap prose">
+    <h2>탈락하면 한 달에 얼마인가</h2>
+    <p>지역가입자 보험료는 <strong>소득분 + 재산분</strong>을 더하고, 여기에 장기요양보험료를 얹습니다. 2027년 기준 건강보험료율 7.19%, 장기요양보험료율 13.90%입니다.</p>
+    <ol class="steps">
+      <li><strong>소득분</strong> = 연 소득 ÷ 12 × 평가율 × 7.19%. 근로·연금은 50%, 사업·기타·임대는 100%로 평가하고, 이자·배당이 연 1,000만원 이하면 합산하지 않습니다.</li>
+      <li><strong>재산분</strong> = (재산세 과표 + 전월세 평가 − 1억원 − 대출 차감)을 60등급 점수표에 넣어 점수 × 211.5원.</li>
+      <li><strong>건강보험료</strong> = 소득분 + 재산분. 월 20,160원~4,591,740원 범위로 맞춥니다(2026년 고시값, 2027년 미고시 가정).</li>
+      <li><strong>장기요양보험료</strong> = 건강보험료 × 13.90%.</li>
+    </ol>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">탈락 시 월 보험료 예시</caption>
+        <thead><tr><th scope="col">상황</th><th scope="col">건강보험료</th><th scope="col">장기요양</th><th scope="col">월 합계</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">공적연금 2,400만 · 재산 과표 4억</th><td data-label="건강보험">215,931원</td><td data-label="장기요양">30,014원</td><td data-label="합계"><strong>245,945원</strong></td></tr>
+          <tr><th scope="row">소득 1,100만 · 재산 과표 6억</th><td data-label="건강보험">204,692원</td><td data-label="장기요양">28,452원</td><td data-label="합계"><strong>233,144원</strong></td></tr>
+          <tr><th scope="row">소득 0 · 재산 과표 9.5억</th><td data-label="건강보험">211,711원</td><td data-label="장기요양">29,427원</td><td data-label="합계"><strong>241,138원</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 세대 -->
+  <section id="household" class="wrap prose">
+    <h2>부모님이 자녀 집에 살면 재산이 합산되나요?</h2>
+    <p>
+      <strong>판정과 부과는 다릅니다.</strong> 피부양자 재산요건은 후보자 본인 지분만 봅니다. 반면 탈락 후 지역가입자 보험료는
+      같은 주소의 지역가입자 세대 단위로 합산합니다. 직장가입자와 그 피부양자는 지역보험료 산정에서 빠지고, 직장가입자 명의의 재산도 들어가지 않습니다.
+      그래서 부모님이 자녀(직장가입자) 명의 집에 살아도 그 집은 부모님의 지역보험료 재산분에 들어가지 않습니다. 부모님이 그 집을 소유하고 있다면 들어갑니다.
+    </p>
+    <div class="note">
+      <h3>탈락을 피하는 방법으로 안내하는 것</h3>
+      <p>소득이 줄었으면 소득월액 조정 신청 후 90일 이내 피부양자 취득 신고를 할 수 있습니다. 주택 관련 대출은 공단에 통보하면 재산 평가에서 차감됩니다.
+        명의 변경·세대 분리는 증여세·취득세·위장전입 문제가 있어 이 계산기에서는 안내하지 않습니다. 전문가 상담이 필요합니다.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="wrap prose">
+    <h2>자주 묻는 질문</h2>
+    <div class="faq">
+      <details><summary>소득 2,000만원은 세전인가요, 세후인가요?</summary>
+        <p>세전입니다. 근로소득은 총급여, 사업·기타소득은 소득금액, 연금은 그해 받은 전액을 합칩니다. 소득세법상 비과세소득은 빠집니다.</p></details>
+      <details><summary>재산 5.4억은 집값인가요, 공시가격인가요?</summary>
+        <p>셋 다 아닙니다. 재산세 고지서의 <strong>과세표준</strong>입니다. 공시가격에 공정시장가액비율(1세대 1주택 43~45%, 그 외 60%)을 곱한 값이라,
+          1세대 1주택이면 공시가격 12억 정도가 과표 5.4억에 해당합니다.</p></details>
+      <details><summary>부부가 같이 올라가 있으면 한 명만 넘어도 둘 다 탈락하나요?</summary>
+        <p>네. 소득요건은 기혼자는 부부 모두 각자 2,000만원 이하를 충족해야 합니다. 한 명이 넘으면 둘 다 탈락합니다.
+          다만 재산요건은 각자 본인 지분으로 봅니다.</p></details>
+      <details><summary>부모님이 자녀 집에 살면 자녀 집 재산도 합산되나요?</summary>
+        <p>피부양자 판정에는 합산되지 않습니다. 판정은 후보자 본인 지분만 봅니다. 탈락 후 지역보험료도 직장가입자 명의 재산은 빠집니다.
+          다만 부모님이 그 집을 소유하고 있다면 본인 재산으로 들어갑니다.</p></details>
+      <details><summary>부모님이 60세가 안 되는데 피부양자가 될 수 있나요?</summary>
+        <p>됩니다. 건강보험 부양요건은 형제자매를 빼면 나이 제한이 없습니다. 60세·20세 기준은 연말정산 기본공제 기준입니다.</p></details>
+      <details><summary>자녀가 30세가 넘었는데 피부양자로 둘 수 있나요?</summary>
+        <p>함께 살면 나이 제한 없이 가능합니다. 따로 살면 미혼이어야 합니다. 30세 기준은 형제자매에게만 적용됩니다.</p></details>
+      <details><summary>사업소득 500만원까지는 괜찮다는데, 주택임대소득은 왜 안 되나요?</summary>
+        <p>500만원 예외는 사업자등록이 없거나 장애인·국가유공자인 경우의 사업소득에만 적용됩니다. 주택임대소득은 사업자등록 유무와 관계없이
+          소득이 있으면 피부양자에서 제외됩니다.</p></details>
+      <details><summary>11월에 갑자기 건보료가 나왔습니다. 왜인가요?</summary>
+        <p>11월부터 전년도 소득과 그해 6월 1일 재산이 반영되기 때문입니다. 1~10월과 판정이 달라질 수 있어, 계산기의 기준월을 11월로 두고 확인하세요.</p></details>
+      <details><summary>탈락하면 한 달에 얼마를 내나요? 장기요양보험료는 별도인가요?</summary>
+        <p>건강보험료(소득분+재산분)에 장기요양보험료(건강보험료의 13.90%)가 함께 붙습니다. 이 계산기는 두 가지를 나눠서 보여 주고,
+          월 합계와 연 환산을 함께 표시합니다.</p></details>
+      <details><summary>소득이 줄었는데 다시 피부양자로 돌아갈 수 있나요?</summary>
+        <p>가능합니다. 소득월액 조정 신청을 한 뒤 직장가입자 자격 변동일부터 90일 이내에 신고하면 변동일로 소급되고, 90일을 넘으면 신고일부터 적용됩니다.</p></details>
+      <details><summary>다른 자녀 밑으로 옮기면 달라지나요?</summary>
+        <p>부양요건(동거·형제자매 소득)과 그 직장가입자의 세대 구성에 따라 달라질 수 있습니다. 소득·재산요건은 후보자 본인 기준이라 바뀌지 않습니다.</p></details>
+      <details><summary>공단 모의계산과 결과가 다릅니다. 어느 쪽을 믿어야 하나요?</summary>
+        <p>공단의 최종 판정이 기준입니다. 이 계산기는 공개된 법령·고시로 참고값을 내는 모의계산이고, 2027년 점수당 금액·상하한은 아직 고시 전이라
+          2026년 값을 가정했습니다. 차이가 크면 공단(1577-1000)에 확인하세요.</p></details>
+    </div>
+  </section>
+
+  <!-- 안내 -->
+  <section class="wrap prose disclaimer">
+    <h2>모의계산 안내와 한계</h2>
+    <p>
+      이 페이지는 <strong>2027년 요율 기준 참고용 모의계산</strong>입니다. 국민건강보험법 시행규칙(시행 2026. 9. 28.)과 시행령(시행 2026. 10. 1.),
+      보건복지부 고시를 바탕으로 만들었지만 공단의 최종 판정이 아닙니다. 실제 보험료는 세대 구성, 소득·재산 자료의 기준연도,
+      대출 차감·경감 적용, 공단 확인 결과에 따라 달라질 수 있습니다.
+    </p>
+    <p class="muted">
+      기준일 2026년 11월 21일 · 적용 요율: 건강보험 7.19%, 장기요양 13.90%(2027년) · 재산 점수당 211.5원, 월 보험료 상·하한
+      20,160~4,591,740원은 2027년 고시 전이라 2026년 값 가정 · 다음 갱신: 2027년 고시 후.
+      딱셈은 국민건강보험공단과 무관한 개인 프로젝트입니다.
+    </p>
+  </section>
+
+  <section class="wrap prose sources">
+    <h2>참고한 자료</h2>
+    <ul>
+      <li>국민건강보험법 시행규칙(시행 2026. 9. 28., 보건복지부령 제1202호) 제2조·별표 1·별표 1의2 — <a href="https://www.law.go.kr/LSW/lsInfoR.do?efYd=20260928&amp;lsiSeq=290599" target="_blank" rel="noopener nofollow">국가법령정보센터</a></li>
+      <li>국민건강보험법 시행령(시행 2026. 10. 1.) 제41조·제42조·제44조·별표 4 — <a href="https://www.law.go.kr/법령/국민건강보험법시행령" target="_blank" rel="noopener nofollow">국가법령정보센터</a></li>
+      <li>국민건강보험공단 — <a href="https://www.nhis.or.kr/nhis/policy/wbhada07400m01.do" target="_blank" rel="noopener nofollow">피부양자 자격의 인정기준</a>, <a href="https://www.nhis.or.kr/static/html/wbma/b/wbmab0101.html" target="_blank" rel="noopener nofollow">지역가입자 부과체계</a></li>
+      <li>보건복지부 — 2026. 9. 8. 건강보험정책심의위원회(2027년 건강보험료율 7.19% 동결), 2026. 10. 30. 장기요양위원회(2027년 장기요양보험료율 13.90%)</li>
+      <li>지방세법 제107조·제110조 및 같은 법 시행령 제109조·제109조의2(재산세 과표·공정시장가액비율)</li>
+    </ul>
+  </section>
+
+  <section class="wrap prose">
+    <h2>다른 계산기</h2>
+    <div class="tool-grid">
+      <a class="tool-card" href="../">
+        <strong>연말정산 계산기</strong>
+        <span>맞벌이 몰아주기 최적 분할과 예상 환급액</span>
+      </a>
+      <a class="tool-card" href="../salary/">
+        <strong>월급·이직 비교</strong>
+        <span>2026 vs 2027 실수령과 이직 제안 비교</span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p class="foot-note"><strong>딱셈</strong> · 모든 계산은 브라우저 안에서만 처리되며 입력값은 저장·전송되지 않습니다. · <a href="../privacy/">개인정보처리방침</a></p>
+    <p class="foot-links"><a href="../">연말정산 계산기</a><span>·</span><a href="../salary/">월급·이직 비교</a><span>·</span><a href="./">건보료·피부양자</a><span>·</span><a href="../about/">딱셈 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 22.</p>
+  </div>
+</footer>
+
+<div class="mini-bar" id="miniBar" hidden>
+  <div class="mini-text"><span id="miniLabel">판정</span><strong id="miniValue">-</strong></div>
+  <button type="button" class="mini-btn" id="miniJump">결과 보기</button>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "건강보험 피부양자 탈락·지역건보료 계산기",
+      "url": "https://ddaksem.kr/health/",
+      "publisher": { "@type": "Organization", "name": "딱셈", "url": "https://ddaksem.kr/" },
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "inLanguage": "ko-KR",
+      "description": "소득 2,000만원·재산세 과표 5.4억/9억 기준으로 건강보험 피부양자 유지·탈락을 판정하고, 탈락 시 월 지역건보료와 장기요양보험료를 계산합니다.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
+      "featureList": ["피부양자 요건 판정", "탈락 시 월 지역건보료", "기준까지 남은 금액 역산", "부업 소득 추가보험료"]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "딱셈", "item": "https://ddaksem.kr/" },
+        { "@type": "ListItem", "position": 2, "name": "건보료·피부양자", "item": "https://ddaksem.kr/health/" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "소득 2,000만원은 세전인가요, 세후인가요?", "acceptedAnswer": { "@type": "Answer", "text": "세전입니다. 근로소득은 총급여, 사업·기타소득은 소득금액, 연금은 그해 받은 전액을 합칩니다. 비과세소득은 빠집니다." } },
+        { "@type": "Question", "name": "재산 5.4억은 집값인가요, 공시가격인가요?", "acceptedAnswer": { "@type": "Answer", "text": "재산세 고지서의 과세표준입니다. 공시가격에 공정시장가액비율을 곱한 값이라 1세대 1주택이면 공시가격 12억 정도가 과표 5.4억에 해당합니다." } },
+        { "@type": "Question", "name": "부부가 같이 올라가 있으면 한 명만 넘어도 둘 다 탈락하나요?", "acceptedAnswer": { "@type": "Answer", "text": "네. 소득요건은 기혼자 부부 모두 각자 2,000만원 이하를 충족해야 합니다. 재산요건은 각자 본인 지분으로 봅니다." } },
+        { "@type": "Question", "name": "부모님이 자녀 집에 살면 자녀 집 재산도 합산되나요?", "acceptedAnswer": { "@type": "Answer", "text": "피부양자 판정에는 합산되지 않습니다. 판정은 후보자 본인 지분만 봅니다. 탈락 후 지역보험료에서도 직장가입자 명의 재산은 빠집니다." } },
+        { "@type": "Question", "name": "부모님이 60세가 안 되는데 피부양자가 될 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "됩니다. 건강보험 부양요건은 형제자매를 빼면 나이 제한이 없습니다. 60세·20세 기준은 연말정산 기본공제 기준입니다." } },
+        { "@type": "Question", "name": "자녀가 30세가 넘었는데 피부양자로 둘 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "함께 살면 나이 제한 없이 가능하고, 따로 살면 미혼이어야 합니다. 30세 기준은 형제자매에게만 적용됩니다." } },
+        { "@type": "Question", "name": "사업소득 500만원까지는 괜찮다는데 주택임대소득은 왜 안 되나요?", "acceptedAnswer": { "@type": "Answer", "text": "500만원 예외는 사업자등록이 없거나 장애인·국가유공자인 경우의 사업소득에만 적용됩니다. 주택임대소득은 소득이 있으면 피부양자에서 제외됩니다." } },
+        { "@type": "Question", "name": "11월에 갑자기 건보료가 나왔습니다. 왜인가요?", "acceptedAnswer": { "@type": "Answer", "text": "11월부터 전년도 소득과 그해 6월 1일 재산이 반영되기 때문입니다. 1~10월과 판정이 달라질 수 있습니다." } },
+        { "@type": "Question", "name": "탈락하면 한 달에 얼마를 내나요?", "acceptedAnswer": { "@type": "Answer", "text": "건강보험료(소득분+재산분)에 장기요양보험료(건강보험료의 13.90%)가 붙습니다. 2027년 요율 기준입니다." } },
+        { "@type": "Question", "name": "소득이 줄었는데 다시 피부양자로 돌아갈 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "가능합니다. 소득월액 조정 신청 후 90일 이내 신고하면 변동일로 소급되고, 90일을 넘으면 신고일부터 적용됩니다." } },
+        { "@type": "Question", "name": "다른 자녀 밑으로 옮기면 달라지나요?", "acceptedAnswer": { "@type": "Answer", "text": "부양요건과 그 직장가입자의 세대 구성에 따라 달라질 수 있습니다. 소득·재산요건은 후보자 본인 기준이라 바뀌지 않습니다." } },
+        { "@type": "Question", "name": "공단 모의계산과 결과가 다릅니다. 어느 쪽을 믿어야 하나요?", "acceptedAnswer": { "@type": "Answer", "text": "공단의 최종 판정이 기준입니다. 이 계산기는 공개된 법령·고시로 참고값을 내는 모의계산입니다." } }
+      ]
+    }
+  ]
+}
+</script>
+<script src="calc.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

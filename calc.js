@@ -63,7 +63,32 @@
     EI_RATE: 0.009,             // 고용보험 실업급여 근로자 0.9%
 
     LOCAL_RATE: 0.10,
-    OVERALL_DEDUCTION_CAP: 25000000
+    OVERALL_DEDUCTION_CAP: 25000000,
+
+    /* 주택자금 공제 (2026년 귀속) */
+    HOUSING_SAVING_RATE: 0.40,        // 주택청약종합저축 납입액의 40%
+    HOUSING_SAVING_CAP: 3000000,      // 납입액 300만원 한도(공제액 120만원)
+    HOUSING_SAVING_GROSS: 70000000,   // 총급여 7,000만원 이하
+    RENT_LOAN_RATE: 0.40,             // 전세자금대출 원리금의 40%
+    HOUSING_COMBINED_CAP: 4000000,    // 청약 + 전세대출 합산 400만원 한도
+    MORTGAGE_LIMITS: {                // 장기주택저당차입금 이자 한도
+      m15_fixed_nod: 20000000,        // 15년 이상 + 고정금리 + 비거치
+      m15_one: 18000000,              // 15년 이상 + 고정금리 또는 비거치
+      m15_none: 8000000,              // 15년 이상 + 둘 다 아님
+      m10_one: 6000000               // 10~15년 + 고정금리 또는 비거치
+    },
+
+    /* 산후조리원 의료비 (2024년 이후 출산분, 총급여 요건 없음) */
+    POSTPARTUM_CAP: 2000000,          // 출산 1회당 200만원
+
+    /* 부녀자 공제 */
+    WOMAN_DEDUCTION: 500000,
+    WOMAN_INCOME_LIMIT: 30000000,     // 종합소득금액 3,000만원 이하
+
+    /* 중소기업 취업자 소득세 감면 (조특법 §30, 2026.12.31까지 취업) */
+    SME_YOUTH_RATE: 0.90,
+    SME_OTHER_RATE: 0.70,
+    SME_CAP: 2000000
   };
 
   var TAX_BRACKETS = [
@@ -136,6 +161,38 @@
     return 550000 + (count - 2) * 400000;
   }
 
+  /* 주택자금 소득공제 (소득세법 §52④⑤⑥, 조특법 §87②)
+     - 청약저축: 총급여 7,000만원 이하·무주택 세대주, 납입액 300만원 한도 × 40%
+     - 전세자금대출 원리금: 무주택 세대주, 원리금 × 40%, 청약과 합쳐 400만원 한도
+     - 주담대 이자: 상환기간·고정금리·비거치 여부에 따른 한도(600만~2,000만원)
+     세 가지를 합친 금액은 주담대 한도를 넘을 수 없습니다. */
+  function housingDeduction(gross, housing) {
+    var out = { savings: 0, rentLoan: 0, mortgage: 0, total: 0, limit: 0, eligible: false };
+    if (!housing || housing.eligible !== true) return out;
+    gross = num(gross);
+    out.eligible = true;
+
+    var savingsPaid = num(housing.savings);
+    var savings = gross > 0 && gross <= C.HOUSING_SAVING_GROSS
+      ? Math.floor(Math.min(savingsPaid, C.HOUSING_SAVING_CAP) * C.HOUSING_SAVING_RATE)
+      : 0;
+    var rentLoan = Math.floor(num(housing.rentLoan) * C.RENT_LOAN_RATE);
+    rentLoan = Math.min(rentLoan, Math.max(0, C.HOUSING_COMBINED_CAP - savings));
+
+    var type = housing.mortgageType;
+    var limit = C.MORTGAGE_LIMITS[type] || 0;
+    var interest = num(housing.mortgageInterest);
+    var mortgage = limit > 0 ? Math.min(interest, limit) : 0;
+
+    var combinedCap = limit > 0 ? limit : C.HOUSING_COMBINED_CAP;
+    out.savings = savings;
+    out.rentLoan = rentLoan;
+    out.mortgage = mortgage;
+    out.limit = limit;
+    out.total = Math.min(savings + rentLoan + mortgage, combinedCap);
+    return out;
+  }
+
   /* 연금계좌 세액공제 한도
      - 연금저축 단독 600만원, IRP·DC를 합치면 900만원까지
      - 연금저축을 600만원 넘게 넣어도 600만원까지만 인정되고,
@@ -163,7 +220,8 @@
     var threshold = gross * C.CARD_THRESHOLD;
     var out = {
       total: total, threshold: threshold, weighted: 0, beforeThreshold: 0,
-      baseLimit: 0, extraLimit: 0, extra: 0, deduction: 0, lowIncome: lowIncome
+      baseLimit: 0, extraLimit: 0, extra: 0, deduction: 0, lowIncome: lowIncome,
+      cultureConverted: lowIncome ? 0 : num(input.culture)
     };
     if (gross <= 0 || total <= 0) return out;
 
@@ -254,7 +312,10 @@
     var disabledChildren = children.filter(function (c) { return !!c.disabled; }).length;
     var disabled = (disabledParents + disabledChildren) * C.DISABLED;
     var singleParent = p.singleParent ? C.SINGLE_PARENT : 0;
-    var personalRaw = basic + senior + disabled + singleParent;
+    /* 부녀자 공제 50만원 — 종합소득금액 3,000만원 이하, 한부모 공제와 중복 불가(유리한 쪽) */
+    var woman = p.woman === true && earnedIncome <= C.WOMAN_INCOME_LIMIT ? C.WOMAN_DEDUCTION : 0;
+    if (singleParent > 0) woman = 0;
+    var personalRaw = basic + senior + disabled + singleParent + woman;
     var personal = Math.min(personalRaw, earnedIncome); // 인적공제 ≤ 종합소득금액
 
     /* 3. 연금보험료공제 / 건강·장기요양·고용보험료 */
@@ -281,8 +342,18 @@
     cardDeductionApplied = Math.min(cardDeductionApplied, remaining);
     remaining -= cardDeductionApplied;
 
+    /* 4-1. 주택자금 소득공제 (청약저축·전세대출 원리금·주담대 이자)
+       카드와 함께 소득공제 종합한도 2,500만원을 나눠 씁니다. */
+    var housing = housingDeduction(gross, p.housing);
+    var housingApplied = Math.min(
+      housing.total,
+      Math.max(0, C.OVERALL_DEDUCTION_CAP - cardDeductionApplied),
+      remaining
+    );
+    remaining -= housingApplied;
+
     /* 5. 과세표준 · 산출세액 */
-    var taxableBase = Math.max(0, earnedIncome - personal - pensionDeduction - healthDeduction - cardDeductionApplied);
+    var taxableBase = Math.max(0, earnedIncome - personal - pensionDeduction - healthDeduction - cardDeductionApplied - housingApplied);
     var calculatedTax = taxOnBase(taxableBase);
 
     /* 6. 세액공제 */
@@ -295,8 +366,10 @@
 
     var medGeneral = Math.min(num(p.medical && p.medical.general), C.MED_GENERAL_CAP);
     var medUnlimited = num(p.medical && p.medical.unlimited);
+    /* 산후조리원비: 일반 의료비 700만원 한도와 별도로 출산 1회당 200만원까지 인정 */
+    var postpartum = num(p.medical && p.medical.postpartum);
     var medThreshold = Math.floor(gross * C.MED_THRESHOLD);
-    var medBase = Math.max(0, medGeneral + medUnlimited - medThreshold);
+    var medBase = Math.max(0, medGeneral + medUnlimited + postpartum - medThreshold);
     var medicalCredit = Math.floor(medBase * C.MED_RATE);
 
     var schoolChildren = p.schoolChildCount || 0;
@@ -325,28 +398,36 @@
     var specialCredits = insuranceCredit + medicalCredit + educationCredit + donationCredit;
     var specialAndRent = specialCredits + rentCredit;
 
+    /* 중소기업 취업자 소득세 감면 (청년 90%·그 외 70%, 연 200만원 한도) */
+    var smeRate = p.sme === "youth" ? C.SME_YOUTH_RATE : (p.sme === "other" ? C.SME_OTHER_RATE : 0);
+
     /* 7. 표준세액공제(13만원)와 특별세액공제 비교
        - 표준세액공제를 받으면 특별소득공제(건강·장기요양·고용보험료)와
          특별세액공제·월세 세액공제를 포기해야 하므로 두 경우를 모두 계산해 유리한 쪽을 씁니다. */
     function makeVariant(useStandard) {
       var healthDed = useStandard ? 0 : healthDeduction;
-      var base = Math.max(0, earnedIncome - personal - pensionDeduction - healthDed - cardDeductionApplied);
+      var base = Math.max(0, earnedIncome - personal - pensionDeduction - healthDed - cardDeductionApplied - housingApplied);
       var tax = taxOnBase(base);
       var earned = earnedIncomeTaxCredit(tax, gross);
+      var exemption = smeRate > 0 ? Math.min(Math.floor(tax * smeRate), C.SME_CAP) : 0;
+      var taxAfterExemption = Math.max(0, tax - exemption);
       var credits = earned + childCredit + pensionCredit +
         (useStandard ? C.STANDARD_CREDIT : specialCredits + rentCredit);
-      var used = Math.min(credits, tax);
+      var used = Math.min(credits, taxAfterExemption);
       return {
         standard: useStandard,
         earnedCredit: earned,
         specialCredits: useStandard ? 0 : specialCredits,
         rentCredit: useStandard ? 0 : rentCredit,
         healthDeduction: healthDed,
+        smeRate: smeRate,
+        smeExemption: exemption,
         taxableBase: base,
         calculatedTax: tax,
+        taxAfterExemption: taxAfterExemption,
         totalCredits: credits,
         usedCredits: used,
-        determinedTax: tax - used
+        determinedTax: taxAfterExemption - used
       };
     }
 
@@ -373,6 +454,7 @@
         disabledParents: disabledParents,
         disabledChildren: disabledChildren,
         singleParent: singleParent,
+        woman: woman,
         total: personal
       },
       pensionDeduction: pensionDeduction,
@@ -381,8 +463,12 @@
       card: card,
       cardFamily: cardFamily,
       cardDeductionApplied: cardDeductionApplied,
+      housing: housing,
+      housingApplied: housingApplied,
       taxableBase: best.taxableBase,
       calculatedTax: best.calculatedTax,
+      smeExemption: best.smeExemption,
+      taxAfterExemption: best.taxAfterExemption,
       credits: {
         earnedIncome: best.earnedCredit,
         child: childCredit,
@@ -405,6 +491,7 @@
         medicalThreshold: medThreshold,
         medicalGeneral: medGeneral,
         medicalUnlimited: medUnlimited,
+        postpartum: postpartum,
         education: educationBase,
         educationSchool: eduSchoolBase,
         educationCollege: eduCollegeBase,
@@ -442,6 +529,18 @@
     return childAge(child) <= 20;
   }
 
+  function normalizeHousing(raw) {
+    raw = raw || {};
+    return {
+      owner: raw.owner === 1 ? 1 : 0,
+      savings: num(raw.savings),
+      rentLoan: num(raw.rentLoan),
+      mortgageInterest: num(raw.mortgageInterest),
+      mortgageType: C.MORTGAGE_LIMITS[raw.mortgageType] ? raw.mortgageType : "none",
+      eligible: raw.eligible === true
+    };
+  }
+
   function normalizeHousehold(h) {
     h = h || {};
     var husband = h.husband || {};
@@ -455,6 +554,8 @@
         pension: num(husband.pension),
         irp: num(husband.irp),
         insurance: num(husband.insurance),
+        woman: !!(husband.woman || h.womanDeduction),
+        sme: ["youth", "other"].indexOf(husband.sme) >= 0 ? husband.sme : (["youth", "other"].indexOf(h.smeH) >= 0 ? h.smeH : "none"),
         card: {
           credit: num(husband.card && husband.card.credit),
           check: num(husband.card && husband.card.check),
@@ -469,6 +570,8 @@
         pension: num(wife.pension),
         irp: num(wife.irp),
         insurance: num(wife.insurance),
+        woman: !!(wife.woman || h.wifeWoman),
+        sme: ["youth", "other"].indexOf(wife.sme) >= 0 ? wife.sme : (["youth", "other"].indexOf(h.smeW) >= 0 ? h.smeW : "none"),
         card: {
           credit: num(wife.card && wife.card.credit),
           check: num(wife.card && wife.card.check),
@@ -502,13 +605,22 @@
         general: num(h.medical && h.medical.general),
         unlimited: num(h.medical && h.medical.unlimited)
       },
+      /* 산후조리원비: 입력액을 출산 1회당 200만원 한도로 미리 깎아 둡니다. */
+      postpartum: Math.min(
+        num(h.postpartum),
+        C.POSTPARTUM_CAP * Math.max(1, Math.floor(num(h.births) || 1))
+      ),
+      births: Math.max(1, Math.floor(num(h.births) || 1)),
       education: {
         school: num(h.education && h.education.school),
         college: num(h.education && h.education.college)
       },
       donation: num(h.donation),
-      rent: num(h.rent),
-      rentEligible: !!h.rentEligible,
+      /* 월세는 2026년 귀속부터 부부가 각자 공제받을 수 있습니다(각 1,000만원 한도). */
+      rentH: num(h.rentH != null ? h.rentH : h.rent),
+      rentW: num(h.rentW),
+      rentEligible: !!(h.rentEligible),
+      housing: normalizeHousing(h.housing),
       spouseDependent: !!h.spouseDependent,
       singleParent: !!h.singleParent,
       autoInsurance: h.autoInsurance !== false
@@ -520,8 +632,7 @@
       childOwner: h.children.map(function () { return 0; }),
       parentOwner: 0,
       medicalShareH: 1,
-      donationOwner: 0,
-      rentOwner: 0
+      donationOwner: 0
     };
     return alloc;
   }
@@ -569,14 +680,18 @@
       singleParent: h.singleParent && (h.mode === "single" ? which === 0 : false),
       medical: {
         general: h.medical.general * share,
-        unlimited: h.medical.unlimited * share
+        unlimited: h.medical.unlimited * share,
+        postpartum: h.postpartum * share
       },
       education: { school: eduSchoolShare, college: eduCollegeShare },
       schoolChildCount: mySchool,
       collegeChildCount: myCollege,
       donation: alloc.donationOwner === which ? h.donation : 0,
-      rent: alloc.rentOwner === which ? h.rent : 0,
+      rent: which === 0 ? h.rentH : h.rentW,
       rentEligible: h.rentEligible,
+      housing: h.housing.owner === which ? h.housing : null,
+      woman: !!person.woman,
+      sme: person.sme,
       autoInsurance: h.autoInsurance
     };
   }
@@ -600,8 +715,7 @@
       childOwner: h.children.map(function () { return which; }),
       parentOwner: which,
       medicalShareH: which === 0 ? 1 : 0,
-      donationOwner: which,
-      rentOwner: which
+      donationOwner: which
     };
   }
 
@@ -630,7 +744,6 @@
   function optimize(h) {
     var n = h.children.length;
     var parentChoices = h.parents.count > 0 ? [0, 1] : [0];
-    var rentChoices = h.rent > 0 ? [0, 1] : [0];
     var donationChoices = h.donation > 0 ? [0, 1] : [0];
     var best = null;
     var masks = Math.pow(2, n);
@@ -640,18 +753,15 @@
       for (var i = 0; i < n; i++) childOwner.push((mask >> i) & 1);
       for (var pi = 0; pi < parentChoices.length; pi++) {
         for (var di = 0; di < donationChoices.length; di++) {
-          for (var ri = 0; ri < rentChoices.length; ri++) {
             for (var step = 0; step <= 20; step++) {
               var alloc = {
                 childOwner: childOwner,
                 parentOwner: parentChoices[pi],
                 medicalShareH: step / 20,
-                donationOwner: donationChoices[di],
-                rentOwner: rentChoices[ri]
+                donationOwner: donationChoices[di]
               };
               best = better(best, computeScenario(h, alloc));
             }
-          }
         }
       }
     }
@@ -664,8 +774,7 @@
           childOwner: best.alloc.childOwner.slice(),
           parentOwner: best.alloc.parentOwner,
           medicalShareH: Math.round(s * 100) / 100,
-          donationOwner: best.alloc.donationOwner,
-          rentOwner: best.alloc.rentOwner
+          donationOwner: best.alloc.donationOwner
         };
         best = better(best, computeScenario(h, candidate));
       }
@@ -719,6 +828,7 @@
     earnedIncomeTaxCredit: earnedIncomeTaxCredit,
     childTaxCredit: childTaxCredit,
     cardDeduction: cardDeduction,
+    housingDeduction: housingDeduction,
     pensionApplied: pensionApplied,
     nationalPension: nationalPension,
     healthInsurance: healthInsurance,
