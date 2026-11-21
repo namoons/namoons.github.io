@@ -129,6 +129,9 @@
   function setWarn(id, html) {
     var w = warnEls[id];
     if (!w) return;
+    /* 같은 내용이면 DOM을 그대로 둡니다(경고 안의 환산 버튼을 눌러도 사라지지 않도록). */
+    if (w.__warnHtml === html) return;
+    w.__warnHtml = html;
     if (html) { w.innerHTML = html; w.hidden = false; }
     else { w.hidden = true; w.innerHTML = ""; }
   }
@@ -140,7 +143,7 @@
         var text = nf.format(v) + "만원 = " + nf.format(Math.round(v / 10000)) + "억원입니다. ";
         var btn = "";
         if (v % 10000 === 0) {
-          btn = '<button type="button" class="warn-btn" data-convert="' + id + '">원→만원으로 바꾸기 (' +
+          btn = '<button type="button" class="warn-btn" data-convert="' + id + '" data-from="' + v + '">원→만원으로 바꾸기 (' +
             nf.format(v / 10000) + ')</button>';
         }
         setWarn(id, "만원 단위 칸입니다. " + text + "원 단위로 입력한 것은 아닌지 확인해 주세요." + btn);
@@ -425,26 +428,32 @@
 
   /* ---------------- 렌더 ---------------- */
   var timer = null;
+  var lastResultsHTML = null;
+  function paint(html) {
+    if (html === lastResultsHTML) return;
+    lastResultsHTML = html;
+    $("results").innerHTML = html;
+  }
   function render() {
     try {
       if (mode === "compare") {
         var input = readCompare();
         var c = SalCalc.compareYears(input);
         var empty = input.annualSalary <= 0;
-        $("results").innerHTML = empty ? renderEmpty("compare") : renderCompare(c);
+        paint(empty ? renderEmpty("compare") : renderCompare(c));
         $("ntSummaryA").innerHTML = empty ? "식대·자가운전보조금·보육수당은 항목별 한도가 있고, 기타 비과세는 한도를 급여 담당자에게 확인하세요." : nonTaxSummary(c.p);
         updateMini(empty ? "연봉을 입력하면 결과가 나옵니다" : "2027 월 실수령", empty ? "—" : won(c.y2027.monthly.net));
       } else {
         var ins = readOffer();
         var o = SalCalc.compareOffer(ins);
         var emptyO = ins.current.annualSalary <= 0 && ins.offer.annualSalary <= 0;
-        $("results").innerHTML = emptyO ? renderEmpty("offer") : renderOffer(o);
+        paint(emptyO ? renderEmpty("offer") : renderOffer(o));
         $("ntSummary").innerHTML = emptyO ? "비과세가 달라지면 세전 연봉이 같아도 실수령이 달라집니다." : nonTaxSummary(o.offer);
         updateMini(emptyO ? "연봉을 입력하면 결과가 나옵니다" : "세후 월 차액", emptyO ? "—" : signedWon(o.diff.monthlyNet));
       }
     } catch (e) {
       console.error(e);
-      $("results").innerHTML = '<div class="result-card"><p>입력값을 확인해 주세요.</p></div>';
+      paint('<div class="result-card"><p>입력값을 확인해 주세요.</p></div>');
       updateMini("계산 오류", "-");
     }
     updateGuards();
@@ -565,16 +574,22 @@
       else applyDemo();
     });
 
-    document.addEventListener("click", function (e) {
+    /* 단위 가드 환산: 포커스 아웃 재렌더로 click이 사라질 수 있어 mousedown도 받습니다. */
+    function convertWon(e) {
       var b = e.target.closest("[data-convert]");
       if (!b) return;
-      var el = $(b.getAttribute("data-convert"));
-      if (!el) return;
+      var id = b.getAttribute("data-convert");
+      var from = Number(b.getAttribute("data-from"));
+      var el = $(id);
+      if (!el || !from) return;
       var v = digits(el.value) ? Number(digits(el.value)) : 0;
+      if (v !== from) return;
       el.value = nf.format(Math.round(v / 10000));
       isDemo = false;
       render();
-    });
+    }
+    document.addEventListener("mousedown", convertWon);
+    document.addEventListener("click", convertWon);
 
     applyDemo("compare");
   });
