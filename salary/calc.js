@@ -22,7 +22,9 @@
     NP_CAP: 6590000,               // 2026.7~2027.6 상한
 
     NONTAXABLE_MEAL: 200000,       // 식대 비과세 월 20만원
-    NONTAXABLE_GUARD: 400000,      // 식대 20만 + 자가운전보조금 20만 (입력 상한)
+    NONTAXABLE_CAR: 200000,        // 자가운전보조금 월 20만원
+    NONTAXABLE_CHILD: 200000,      // 6세 이하 자녀 1명당 보육·출산수당 월 20만원
+    NONTAXABLE_GUARD: 400000,      // (호환) 식대 20만 + 자가운전보조금 20만 합계
 
     MIN_WAGE: {
       2026: { hourly: 10320, monthly: 2156880, hours: 209 },
@@ -161,34 +163,81 @@
   }
 
   /* ------------------------------------------------------------------ *
-   * 한 사람의 월 실수령액
-   * input: { annualSalary, monthlyNonTaxable, dependents, children,
-   *          ei2027Reform, severanceIncluded }
+   * 한 사람 입력 정리
+   * input: { annualSalary, severanceIncluded, monthlyNonTaxable,
+   *          nonTaxable: {meal, car, childcare, other}, preschoolChildren,
+   *          dependents, children, creditChildren, ei2027Reform }
    * ------------------------------------------------------------------ */
   function normalizePerson(p) {
     p = p || {};
     var annual = num(p.annualSalary);
-    var nontaxable = Math.min(num(p.monthlyNonTaxable), C.NONTAXABLE_GUARD);
-    if (nontaxable > Math.floor(annual / 12)) nontaxable = Math.floor(annual / 12);
+    /* 퇴직금 포함 연봉이면 13분할(12개월 급여 + 퇴직금 1개월분)로 월 급여를 구합니다. */
+    var severanceIncluded = !!p.severanceIncluded;
+    var monthlyGross = Math.floor(annual / (severanceIncluded ? 13 : 12));
     var dependents = Math.max(0, Math.floor(num(p.dependents)));
     var children = Math.max(0, Math.floor(num(p.children)));
     if (children > dependents) dependents = children;
+    /* 자녀세액공제 대상(2027년 10세 이상 = 2017년 이전 출생)은 기본공제 자녀 수와 분리합니다. */
+    var creditChildren = (p.creditChildren === null || p.creditChildren === undefined || p.creditChildren === "")
+      ? children
+      : Math.min(children, Math.max(0, Math.floor(num(p.creditChildren))));
+
+    /* 비과세: 항목별 법정 한도를 적용하고, 넘는 금액은 과세로 돌립니다. */
+    var nt = p.nonTaxable && typeof p.nonTaxable === "object" ? p.nonTaxable : null;
+    var meal = num(nt && nt.meal);
+    var car = num(nt && nt.car);
+    var childcare = num(nt && nt.childcare);
+    var other = num(nt && nt.other);
+    var legacy = num(p.monthlyNonTaxable);
+    var nonTaxable, converted;
+    if (!meal && !car && !childcare && !other && legacy) {
+      /* 단일 칸 입력(예전 방식): 식대 20만 + 자가운전보조금 20만까지 인정 */
+      nonTaxable = Math.min(legacy, C.NONTAXABLE_GUARD);
+      converted = legacy - nonTaxable;
+      meal = Math.min(legacy, C.NONTAXABLE_MEAL);
+      car = Math.min(Math.max(0, legacy - C.NONTAXABLE_MEAL), C.NONTAXABLE_CAR);
+    } else {
+      var kidCount = Math.max(0, Math.floor(num(p.preschoolChildren)));
+      var mealOk = Math.min(meal, C.NONTAXABLE_MEAL);
+      var carOk = Math.min(car, C.NONTAXABLE_CAR);
+      var childOk = Math.min(childcare, C.NONTAXABLE_CHILD * kidCount);
+      nonTaxable = mealOk + carOk + childOk + other;
+      converted = (meal - mealOk) + (car - carOk) + (childcare - childOk);
+      meal = mealOk; car = carOk; childcare = childOk;
+    }
+    if (nonTaxable > monthlyGross) {
+      converted += nonTaxable - monthlyGross;
+      nonTaxable = monthlyGross;
+    }
+
     return {
+      normalized: true,
       annualSalary: annual,
-      monthlyNonTaxable: nontaxable,
+      severanceIncluded: severanceIncluded,
+      monthlyGrossWon: monthlyGross,
+      monthlyNonTaxable: nonTaxable,
+      nonTaxable: {
+        applied: nonTaxable,
+        converted: converted,
+        meal: meal,
+        car: car,
+        childcare: childcare,
+        other: other
+      },
       dependents: dependents,
       children: children,
+      creditChildren: creditChildren,
       ei2027Reform: !!p.ei2027Reform
     };
   }
 
   function computePerson(raw, year) {
-    var p = normalizePerson(raw);
+    var p = (raw && raw.normalized) ? raw : normalizePerson(raw);
     year = year === 2026 ? 2026 : 2027;
     var rates = C.RATES[year];
 
     var annualGross = p.annualSalary;
-    var monthlyGross = Math.floor(annualGross / 12);
+    var monthlyGross = p.monthlyGrossWon;
     var annualNonTaxable = p.monthlyNonTaxable * 12;
     var annualTaxable = Math.max(0, annualGross - annualNonTaxable);
     var monthlyTaxable = Math.max(0, monthlyGross - p.monthlyNonTaxable);
@@ -206,7 +255,7 @@
     var afterPersonal = Math.max(0, earnedIncome - basicDeduction - pensionDeduction);
     var healthDeduction = Math.min(ins.hi + ins.ltc + ins.ei, afterPersonal);
 
-    var childCredit = childTaxCredit(p.children);
+    var childCredit = childTaxCredit(p.creditChildren);
 
     function variant(useSpecialDeduction) {
       var healthDed = useSpecialDeduction ? healthDeduction : 0;
@@ -331,52 +380,71 @@
 
   /* ------------------------------------------------------------------ *
    * 이직 비교
-   * current / offer: { annualSalary, monthlyNonTaxable, incentive }
+   * current / offer: { annualSalary, severanceIncluded, monthlyNonTaxable,
+   *                   nonTaxable, incentive }
    * ------------------------------------------------------------------ */
   function compareOffer(raw) {
-    var cur = normalizePerson(raw.current);
-    var off = normalizePerson(raw.offer);
     var dependents = Math.max(0, Math.floor(num(raw.dependents)));
     var children = Math.max(0, Math.floor(num(raw.children)));
+    var creditChildren = raw.creditChildren;
     var common = {
       dependents: dependents,
       children: children,
-      ei2027Reform: !!raw.ei2027Reform
+      creditChildren: creditChildren,
+      ei2027Reform: !!raw.ei2027Reform,
+      nonTaxable: raw.nonTaxable,
+      monthlyNonTaxable: raw.monthlyNonTaxable,
+      preschoolChildren: raw.preschoolChildren
     };
 
     function withIncentive(p, incentive) {
-      return {
-        annualSalary: p.annualSalary + num(incentive),
-        monthlyNonTaxable: p.monthlyNonTaxable,
-        dependents: dependents,
-        children: children,
-        ei2027Reform: common.ei2027Reform
-      };
+      p = p || {};
+      var merged = {};
+      for (var k in p) {
+        if (Object.prototype.hasOwnProperty.call(p, k)) merged[k] = p[k];
+      }
+      merged.annualSalary = num(p.annualSalary) + num(incentive);
+      merged.dependents = dependents;
+      merged.children = children;
+      merged.creditChildren = creditChildren;
+      merged.ei2027Reform = common.ei2027Reform;
+      /* 비과세는 두 조건 공통 입력이라 조건별 값이 없으면 공통값을 씁니다. */
+      if (merged.nonTaxable === undefined) merged.nonTaxable = common.nonTaxable;
+      if (merged.monthlyNonTaxable === undefined) merged.monthlyNonTaxable = common.monthlyNonTaxable;
+      if (merged.preschoolChildren === undefined) merged.preschoolChildren = common.preschoolChildren;
+      return merged;
     }
 
     var curIncentive = num(raw.current && raw.current.incentive);
     var offIncentive = num(raw.offer && raw.offer.incentive);
 
-    var current = computePerson(withIncentive(cur, curIncentive), 2027);
-    var offer = computePerson(withIncentive(off, offIncentive), 2027);
+    var current = computePerson(withIncentive(raw.current, curIncentive), 2027);
+    var offer = computePerson(withIncentive(raw.offer, offIncentive), 2027);
 
-    var currentTotal = cur.annualSalary + curIncentive;
-    var offerTotal = off.annualSalary + offIncentive;
+    var currentTotal = num(raw.current && raw.current.annualSalary) + curIncentive;
+    var offerTotal = num(raw.offer && raw.offer.annualSalary) + offIncentive;
+    var curIncluded = !!current.input.severanceIncluded;
+    var offIncluded = !!offer.input.severanceIncluded;
 
-    var severanceCurrent = Math.floor(currentTotal / 12);
-    var severanceOffer = Math.floor(offerTotal / 12);
+    /* 퇴직금 1년분: 포함 연봉이면 총보상/13, 별도면 총보상/12 */
+    var severanceCurrent = Math.floor(currentTotal / (curIncluded ? 13 : 12));
+    var severanceOffer = Math.floor(offerTotal / (offIncluded ? 13 : 12));
+    /* 총보상(퇴직금 포함 기준): 별도 지급이면 퇴직금 1년분을 더해 비교합니다. */
+    var totalCompCurrent = curIncluded ? currentTotal : currentTotal + severanceCurrent;
+    var totalCompOffer = offIncluded ? offerTotal : offerTotal + severanceOffer;
 
     var diff = {
       monthlyGross: offer.monthly.gross - current.monthly.gross,
       monthlyNet: offer.monthly.net - current.monthly.net,
       annualGross: offerTotal - currentTotal,
+      totalComp: totalCompOffer - totalCompCurrent,
       annualNet: offer.annual.net - current.annual.net,
       insurance: offer.annual.insurance - current.annual.insurance,
       incomeTax: offer.annual.incomeTax - current.annual.incomeTax,
       localTax: offer.annual.localTax - current.annual.localTax,
       severance: severanceOffer - severanceCurrent
     };
-    diff.nominalRaise = currentTotal > 0 ? diff.annualGross / currentTotal : 0;
+    diff.nominalRaise = totalCompCurrent > 0 ? diff.totalComp / totalCompCurrent : 0;
     diff.realRaise = current.annual.net > 0 ? diff.annualNet / current.annual.net : 0;
     diff.monthlyRealRaise = current.monthly.net > 0 ? diff.monthlyNet / current.monthly.net : 0;
 
@@ -385,6 +453,8 @@
       offer: offer,
       currentTotal: currentTotal,
       offerTotal: offerTotal,
+      totalComp: { current: totalCompCurrent, offer: totalCompOffer, diff: diff.totalComp },
+      included: { current: curIncluded, offer: offIncluded },
       currentIncentive: curIncentive,
       offerIncentive: offIncentive,
       severance: { current: severanceCurrent, offer: severanceOffer, diff: diff.severance },

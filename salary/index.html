@@ -87,24 +87,33 @@
       <div id="formCompare">
         <div class="form">
           <fieldset class="card">
-            <legend class="card-title"><span class="step">1</span> 연봉과 비과세</legend>
-            <p class="card-help">연봉은 세전 총액입니다. 식대처럼 비과세로 받는 금액은 빼고 과세급여와 4대보험료를 계산합니다.</p>
+            <legend class="card-title"><span class="step">1</span> 연봉</legend>
             <div class="grid-2">
               <label class="field">
                 <span class="field-label">연봉 <em>(세전, 비과세 포함)</em></span>
                 <span class="input-wrap"><input id="salaryInput" type="text" inputmode="numeric" value="5,000" aria-describedby="salaryHelp"><span class="unit">만원</span></span>
               </label>
-              <label class="field">
-                <span class="field-label">월 비과세 <em>(식대 등)</em></span>
-                <span class="input-wrap"><input id="nontaxableInput" type="text" inputmode="numeric" value="200,000"><span class="unit">원</span></span>
-              </label>
             </div>
-            <p class="hint" id="salaryHelp">식대는 월 20만원까지 비과세입니다. 자가운전보조금(월 20만원)을 함께 받으면 40만원까지 입력할 수 있고, 한도를 넘는 금액은 과세됩니다.</p>
+            <label class="check"><input type="checkbox" id="sevIncludedA"> 연봉에 <strong>퇴직금 포함</strong> <em>(포함이면 월 급여 = 연봉 ÷ 13)</em></label>
+            <p class="hint" id="salaryHelp">“연봉 5,000만원(퇴직금 별도)”이면 월 급여는 5,000÷12, “퇴직금 포함”이면 5,000÷13으로 계산합니다. 표시된 연봉이 어느 쪽인지 먼저 확인하세요.</p>
           </fieldset>
 
           <fieldset class="card">
-            <legend class="card-title"><span class="step">2</span> 부양가족</legend>
+            <legend class="card-title"><span class="step">2</span> 비과세 항목 <em class="title-em">(월 금액)</em></legend>
+            <p class="card-help">항목별 법정 한도까지만 비과세이고, 한도를 넘는 금액은 과세로 전환해 계산합니다.</p>
             <div class="grid-2">
+              <label class="field"><span class="field-label">식대 <em>(월 20만원 한도)</em></span><span class="input-wrap"><input id="ntMealA" type="text" inputmode="numeric" value="200,000"><span class="unit">원</span></span></label>
+              <label class="field"><span class="field-label">자가운전보조금 <em>(월 20만원)</em></span><span class="input-wrap"><input id="ntCarA" type="text" inputmode="numeric" value="0"><span class="unit">원</span></span></label>
+              <label class="field"><span class="field-label">보육수당 <em>(6세 이하 1명당 20만원)</em></span><span class="input-wrap"><input id="ntChildA" type="text" inputmode="numeric" value="0"><span class="unit">원</span></span></label>
+              <label class="field"><span class="field-label">6세 이하 자녀 수</span><span class="input-wrap"><input id="preschoolA" type="text" inputmode="numeric" value="0"><span class="unit">명</span></span></label>
+              <label class="field"><span class="field-label">기타 비과세 <em>(연구보조비 등)</em></span><span class="input-wrap"><input id="ntOtherA" type="text" inputmode="numeric" value="0"><span class="unit">원</span></span></label>
+            </div>
+            <p class="hint" id="ntSummaryA">식대·자가운전보조금·보육수당은 항목별 한도가 있고, 기타 비과세는 한도를 급여 담당자에게 확인하세요.</p>
+          </fieldset>
+
+          <fieldset class="card">
+            <legend class="card-title"><span class="step">3</span> 부양가족</legend>
+            <div class="grid-3">
               <label class="field">
                 <span class="field-label">부양가족 수 <em>(본인 제외)</em></span>
                 <span class="input-wrap"><input id="dependentsA" type="text" inputmode="numeric" value="2"><span class="unit">명</span></span>
@@ -113,19 +122,26 @@
                 <span class="field-label">자녀 수 <em>(20세 이하)</em></span>
                 <span class="input-wrap"><input id="childrenA" type="text" inputmode="numeric" value="1"><span class="unit">명</span></span>
               </label>
+              <label class="field">
+                <span class="field-label">자녀세액공제 대상 <em>(10세 이상)</em></span>
+                <span class="input-wrap"><input id="creditChildrenA" type="text" inputmode="numeric" value="1"><span class="unit">명</span></span>
+              </label>
             </div>
-            <p class="hint">부양가족 수에는 배우자·자녀·부모님을 모두 포함해 주세요. 기본공제는 1인당 연 150만원, 자녀세액공제는 2027년 귀속 기준 10세 이상(2017년생 제외) 자녀에게 적용됩니다. 입력한 자녀가 모두 자녀세액공제 대상이라고 가정합니다.</p>
+            <p class="hint">부양가족 수에는 배우자·자녀·부모님을 모두 포함합니다. 자녀세액공제는 2027년 귀속 기준 <strong>10세 이상(2017년 이전 출생)</strong>이 대상이라, 20세 이하 자녀 수와 따로 입력합니다. 10세 미만 자녀는 기본공제만 됩니다.</p>
           </fieldset>
 
           <fieldset class="card">
-            <legend class="card-title"><span class="step">3</span> 2027년 요율 가정</legend>
+            <legend class="card-title"><span class="step">4</span> 2027년 요율 가정</legend>
             <label class="check"><input type="checkbox" id="eiReformA"> 고용보험료율 개정안 반영 (근로자 0.9% → 1.0%)</label>
             <p class="hint">2026년 11월 현재 법령은 0.9%입니다. 정부 개정안(시행령 입법예고 2026.9.22~11.2)이 시행되면 2027년 근로자 부담은 1.0%가 됩니다. 확정 전이라 기본값은 꺼 두었습니다.</p>
           </fieldset>
         </div>
         <div class="form-foot">
           <span class="hint" style="margin:0">입력을 바꾸면 바로 다시 계산됩니다.</span>
-          <div class="form-buttons"><button type="button" id="resetBtn" class="btn-ghost">초기화</button></div>
+          <div class="form-buttons">
+            <button type="button" class="btn-ghost" id="resetBtn">모두 지우기</button>
+            <button type="button" class="btn-ghost" id="demoBtn">예시 불러오기</button>
+          </div>
         </div>
       </div>
 
@@ -143,13 +159,10 @@
                   <span class="input-wrap"><input id="curSalary" type="text" inputmode="numeric" value="5,000"><span class="unit">만원</span></span>
                 </label>
                 <label class="field">
-                  <span class="field-label">월 비과세</span>
-                  <span class="input-wrap"><input id="curNontaxable" type="text" inputmode="numeric" value="200,000"><span class="unit">원</span></span>
-                </label>
-                <label class="field">
                   <span class="field-label">인센티브 <em>(연간)</em></span>
                   <span class="input-wrap"><input id="curIncentive" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span>
                 </label>
+                <label class="check"><input type="checkbox" id="curSevIncluded"> 연봉에 퇴직금 포함 <em>(월 급여 = 연봉÷13)</em></label>
               </div>
               <div class="person-col">
                 <h3 class="person-name">이직 제안</h3>
@@ -158,21 +171,31 @@
                   <span class="input-wrap"><input id="offSalary" type="text" inputmode="numeric" value="6,000"><span class="unit">만원</span></span>
                 </label>
                 <label class="field">
-                  <span class="field-label">월 비과세</span>
-                  <span class="input-wrap"><input id="offNontaxable" type="text" inputmode="numeric" value="200,000"><span class="unit">원</span></span>
-                </label>
-                <label class="field">
                   <span class="field-label">인센티브 <em>(연간, 별도)</em></span>
                   <span class="input-wrap"><input id="offIncentive" type="text" inputmode="numeric" value="500"><span class="unit">만원</span></span>
                 </label>
+                <label class="check"><input type="checkbox" id="offSevIncluded"> 연봉에 퇴직금 포함 <em>(월 급여 = 연봉÷13)</em></label>
               </div>
             </div>
-            <p class="hint">인센티브를 연봉에 이미 포함해 입력했다면 인센티브 칸은 0으로 두세요. 퇴직금 포함 여부는 아래 ‘이직 협상 팁’에서 확인할 수 있습니다.</p>
+            <p class="hint">인센티브를 연봉에 이미 포함해 입력했다면 인센티브 칸은 0으로 두세요. 퇴직금 포함 여부는 위 체크박스로 반영됩니다.</p>
           </fieldset>
 
           <fieldset class="card">
-            <legend class="card-title"><span class="step">2</span> 부양가족 <em class="title-em">(두 조건 공통)</em></legend>
+            <legend class="card-title"><span class="step">2</span> 비과세 항목 <em class="title-em">(두 조건 공통, 월 금액)</em></legend>
+            <p class="card-help">두 회사의 비과세 구성이 같다고 보고 계산합니다. 항목별 한도를 넘는 금액은 과세로 전환됩니다.</p>
             <div class="grid-2">
+              <label class="field"><span class="field-label">식대 <em>(월 20만원 한도)</em></span><span class="input-wrap"><input id="ntMeal" type="text" inputmode="numeric" value="200,000"><span class="unit">원</span></span></label>
+              <label class="field"><span class="field-label">자가운전보조금 <em>(월 20만원)</em></span><span class="input-wrap"><input id="ntCar" type="text" inputmode="numeric" value="0"><span class="unit">원</span></span></label>
+              <label class="field"><span class="field-label">보육수당 <em>(6세 이하 1명당 20만원)</em></span><span class="input-wrap"><input id="ntChild" type="text" inputmode="numeric" value="0"><span class="unit">원</span></span></label>
+              <label class="field"><span class="field-label">6세 이하 자녀 수</span><span class="input-wrap"><input id="preschoolB" type="text" inputmode="numeric" value="0"><span class="unit">명</span></span></label>
+              <label class="field"><span class="field-label">기타 비과세 <em>(연구보조비 등)</em></span><span class="input-wrap"><input id="ntOther" type="text" inputmode="numeric" value="0"><span class="unit">원</span></span></label>
+            </div>
+            <p class="hint" id="ntSummary">비과세가 달라지면 세전 연봉이 같아도 실수령이 달라집니다.</p>
+          </fieldset>
+
+          <fieldset class="card">
+            <legend class="card-title"><span class="step">3</span> 부양가족 <em class="title-em">(두 조건 공통)</em></legend>
+            <div class="grid-3">
               <label class="field">
                 <span class="field-label">부양가족 수 <em>(본인 제외)</em></span>
                 <span class="input-wrap"><input id="dependentsB" type="text" inputmode="numeric" value="2"><span class="unit">명</span></span>
@@ -181,19 +204,26 @@
                 <span class="field-label">자녀 수 <em>(20세 이하)</em></span>
                 <span class="input-wrap"><input id="childrenB" type="text" inputmode="numeric" value="1"><span class="unit">명</span></span>
               </label>
+              <label class="field">
+                <span class="field-label">자녀세액공제 대상 <em>(10세 이상)</em></span>
+                <span class="input-wrap"><input id="creditChildrenB" type="text" inputmode="numeric" value="1"><span class="unit">명</span></span>
+              </label>
             </div>
             <p class="hint">이직해도 부양가족 구성은 그대로라고 보고 계산합니다. 가족 수가 달라지면 기본공제와 자녀세액공제가 달라져 실수령액도 바뀝니다.</p>
           </fieldset>
 
           <fieldset class="card">
-            <legend class="card-title"><span class="step">3</span> 2027년 요율 가정</legend>
+            <legend class="card-title"><span class="step">4</span> 2027년 요율 가정</legend>
             <label class="check"><input type="checkbox" id="eiReformB"> 고용보험료율 개정안 반영 (근로자 0.9% → 1.0%)</label>
             <p class="hint">이직 시점이 2027년이라면 2027년 요율로 계산합니다. 고용보험 개정안은 아직 시행령 개정 전입니다.</p>
           </fieldset>
         </div>
         <div class="form-foot">
           <span class="hint" style="margin:0">현 직장과 제안 조건을 바꾸면 바로 다시 계산됩니다.</span>
-          <div class="form-buttons"><button type="button" class="btn-ghost" id="resetBtn2">초기화</button></div>
+          <div class="form-buttons">
+            <button type="button" class="btn-ghost" id="resetBtn2">모두 지우기</button>
+            <button type="button" class="btn-ghost" id="demoBtn2">예시 불러오기</button>
+          </div>
         </div>
       </div>
 
@@ -288,7 +318,7 @@
   <section class="wrap prose">
     <h2>연봉별 2026년 vs 2027년 월 실수령액</h2>
     <p>
-      배우자와 자녀 1명(부양가족 2명, 자녀 1명), 월 비과세 식대 20만원, 고용보험 0.9% 기준입니다.
+      배우자와 자녀 1명(부양가족 2명, 자녀 1명), 자녀세액공제 대상 1명, 월 비과세 식대 20만원, 퇴직금 별도, 고용보험 0.9% 기준입니다.
       소득세는 연말정산 기준으로 환산한 예상치입니다.
     </p>
     <div class="table-wrap">
@@ -322,11 +352,11 @@
       아래 다섯 가지를 확인하면 같은 연봉이라도 조건을 정확히 비교할 수 있습니다.
     </p>
     <ol class="steps">
-      <li><strong>퇴직금 포함 연봉인지, 별도인지 확인하세요.</strong> “연봉 6,000만원(퇴직금 포함)”은 퇴직금을 빼면 실질 연봉이 약 5,538만원입니다. 퇴직금은 통상 총보상의 1/12이므로, 포함 여부만으로 7~8% 차이가 납니다.</li>
+      <li><strong>퇴직금 포함 연봉인지, 별도인지 확인하세요.</strong> “연봉 6,000만원(퇴직금 포함)”은 퇴직금을 빼면 실질 연봉이 약 5,538만원입니다. 퇴직금은 통상 총보상의 1/12이므로, 포함 여부만으로 7~8% 차이가 납니다. 위 입력 화면의 <strong>‘퇴직금 포함’</strong> 체크박스로 두 조건을 같은 기준에서 비교할 수 있습니다.</li>
       <li><strong>인센티브는 확정 급여가 아닙니다.</strong> 성과급·인센티브는 지급 조건과 최근 3년 지급률을 확인하세요. 기본급 기준으로도 비교해 두면 안전합니다.</li>
       <li><strong>비과세 항목이 줄어들 수 있습니다.</strong> 식대 월 20만원, 자가운전보조금 월 20만원 등 비과세가 사라지면 세전 연봉이 같아도 실수령액은 줄어듭니다.</li>
       <li><strong>4대보험 상한과 소득세 구간을 확인하세요.</strong> 연봉이 국민연금 상한(월 659만원)을 넘으면 보험료 증가는 멈추지만, 소득세는 다음 구간(15%→24%→35%)으로 올라갈 수 있습니다.</li>
-      <li><strong>연봉 협상은 세전 기준으로 이뤄집니다.</strong> “세후 400만원”을 원한다면 세전으로 얼마여야 하는지 이 계산기로 역산해 보세요. 세후 인상률이 세전 인상률보다 낮다는 점도 기억하세요.</li>
+      <li><strong>연봉 협상은 세전 기준으로 이뤄집니다.</strong> “세후 400만원”을 원한다면 세전 연봉을 조금씩 바꿔 넣어 보세요. 이 계산기는 입력한 연봉의 세후 월 실수령액을 보여 주므로, 목표 금액에 가까운 연봉을 찾을 때까지 연봉 칸을 바꿔 보면 됩니다. 세후 인상률이 세전 인상률보다 낮다는 점도 기억하세요.</li>
     </ol>
 
     <h3>이직 제안 비교 예시</h3>
@@ -381,7 +411,7 @@
       <li>건강보험료는 전년도 보수를 기준으로 산정되어 7월에 정산됩니다. 연봉이 중간에 오르면 실제 공제액은 바로 바뀌지 않을 수 있습니다.</li>
       <li>2027년 국민연금 기준소득월액 상한은 2027년 6월분까지 659만원으로 확정되었고, 7월분부터는 고시 전이라 같은 금액을 가정했습니다.</li>
       <li>주택자금·청약저축·소기업 공제·우리사주·연금계좌 세액공제, 신용카드 소득공제, 의료비·교육비·기부금·월세 세액공제는 반영하지 않았습니다. 이 항목이 많으면 실제 결정세액은 더 낮아집니다.</li>
-      <li>퇴직금은 총보상을 12로 나눈 1년분 세전 적립액입니다. 퇴직소득세, 근속기간, 평균임금 산정 방식은 반영하지 않았습니다.</li>
+      <li>퇴직금은 총보상 기준의 1년분 세전 적립액입니다(포함 연봉이면 연봉÷13, 별도면 연봉÷12). 퇴직소득세, 근속기간, 평균임금 산정 방식은 반영하지 않았습니다.</li>
     </ul>
   </section>
 
@@ -419,7 +449,7 @@
       </details>
       <details>
         <summary>부양가족 수는 어떻게 세나요?</summary>
-        <p>본인을 제외하고 기본공제를 받을 수 있는 사람 수를 입력합니다. 배우자, 20세 이하 자녀, 만 60세 이상 부모님이 대표적입니다. 자녀 수는 그중 20세 이하 자녀 수로, 자녀세액공제 계산에 따로 쓰입니다. 부양가족 수가 자녀 수보다 적으면 자녀 수에 맞춰 계산합니다.</p>
+        <p>본인을 제외하고 기본공제를 받을 수 있는 사람 수를 입력합니다. 배우자, 20세 이하 자녀, 만 60세 이상 부모님이 대표적입니다. 자녀 수는 그중 20세 이하 자녀 수이고, 자녀세액공제 대상 수는 그중 2027년 기준 10세 이상(2017년 이전 출생) 자녀 수입니다. 부양가족 수가 자녀 수보다 적으면 자녀 수에 맞춰 계산합니다.</p>
       </details>
       <details>
         <summary>고용보험료율 1.0% 인상은 확정인가요?</summary>

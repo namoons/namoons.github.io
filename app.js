@@ -9,24 +9,27 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var mode = "couple";
-  var childrenInitialized = false;
+  var isDemo = true;        // 첫 진입은 예시 데이터 상태
+  var applying = false;     // 예시·초기화로 값을 넣는 중에는 '사용자 수정'으로 보지 않음
 
   /* ---------------- 입력 도우미 ---------------- */
   function digits(v) {
     return String(v == null ? "" : v).replace(/[^\d]/g, "");
   }
   function numOf(id) {
-    var d = digits($(id).value);
+    var el = $(id);
+    if (!el) return 0;
+    var d = digits(el.value);
     return d ? Number(d) : 0;
   }
   function manOf(id) { return numOf(id) * 10000; }
-  function fmtInput(el, suffix) {
+  function fmtInput(el) {
     var d = digits(el.value);
-    el.value = d ? nf.format(Number(d)) + (suffix || "") : "";
+    el.value = d ? nf.format(Number(d)) : "";
   }
   function won(v) {
     var n = Math.round(Number(v) || 0);
-    return (n > 0 ? "" : "") + nf.format(n) + "원";
+    return nf.format(n) + "원";
   }
   function signedWon(v) {
     var n = Math.round(Number(v) || 0);
@@ -58,7 +61,7 @@
     none: "해당 없음"
   };
 
-  function childRow(birthYear, school) {
+  function childRow(birthYear, school, disabled) {
     var wrap = document.createElement("div");
     wrap.className = "child-row";
     wrap.innerHTML =
@@ -71,6 +74,8 @@
         return '<option value="' + k + '"' + (k === (school || "school") ? " selected" : "") + ">" + SCHOOL_LABEL[k] + "</option>";
       }).join("") +
       "</select></label>" +
+      '<label class="child-dis"><input type="checkbox" class="child-handicap"' + (disabled ? " checked" : "") +
+      ' aria-label="자녀 장애인 여부"> 장애</label>' +
       '<button type="button" class="btn-remove" aria-label="자녀 삭제">×</button>';
     return wrap;
   }
@@ -88,21 +93,24 @@
   function readChildren() {
     return Array.prototype.map.call(document.querySelectorAll("#children .child-row"), function (row) {
       var by = digits(row.querySelector(".child-birth").value);
+      var dis = row.querySelector(".child-handicap");
       return {
         birthYear: by ? Number(by) : 2016,
-        school: row.querySelector(".child-school").value
+        school: row.querySelector(".child-school").value,
+        disabled: !!(dis && dis.checked)
       };
     });
   }
 
   function readState() {
-    var children = readChildren();
+    var single = mode === "single";
     return {
       mode: mode,
       husband: {
         gross: manOf("hGross"),
         prepaid: numOf("hPrepaid"),
-        pension: manOf("hPension"),
+        pension: manOf("hPensionSaving"),
+        irp: manOf("hIrp"),
         insurance: manOf("hInsurance"),
         card: {
           credit: manOf("hCardCredit"),
@@ -113,19 +121,20 @@
         }
       },
       wife: {
-        gross: mode === "single" ? 0 : manOf("wGross"),
-        prepaid: mode === "single" ? 0 : numOf("wPrepaid"),
-        pension: mode === "single" ? 0 : manOf("wPension"),
-        insurance: mode === "single" ? 0 : manOf("wInsurance"),
+        gross: single ? 0 : manOf("wGross"),
+        prepaid: single ? 0 : numOf("wPrepaid"),
+        pension: single ? 0 : manOf("wPensionSaving"),
+        irp: single ? 0 : manOf("wIrp"),
+        insurance: single ? 0 : manOf("wInsurance"),
         card: {
-          credit: mode === "single" ? 0 : manOf("wCardCredit"),
-          check: mode === "single" ? 0 : manOf("wCardCheck"),
-          traditional: mode === "single" ? 0 : manOf("wCardTraditional"),
-          transit: mode === "single" ? 0 : manOf("wCardTransit"),
-          culture: mode === "single" ? 0 : manOf("wCardCulture")
+          credit: single ? 0 : manOf("wCardCredit"),
+          check: single ? 0 : manOf("wCardCheck"),
+          traditional: single ? 0 : manOf("wCardTraditional"),
+          transit: single ? 0 : manOf("wCardTransit"),
+          culture: single ? 0 : manOf("wCardCulture")
         }
       },
-      children: children,
+      children: readChildren(),
       parents: {
         count: numOf("pCount"),
         seniors: numOf("pSenior"),
@@ -133,20 +142,91 @@
       },
       childCard: manOf("childCard"),
       dependentCard: {
-        credit: mode === "single" ? manOf("depCardCredit") : 0,
-        check: mode === "single" ? manOf("depCardCheck") : 0,
+        credit: single ? manOf("depCardCredit") : 0,
+        check: single ? manOf("depCardCheck") : 0,
         /* 전통시장·대중교통은 공제율(40%)과 추가공제 한도가 같아 한 칸으로 받습니다 */
-        traditional: mode === "single" ? manOf("depCardTraditional") : 0,
+        traditional: single ? manOf("depCardTraditional") : 0,
         transit: 0
       },
       medical: { general: manOf("medGeneral"), unlimited: manOf("medUnlimited") },
       education: { school: manOf("eduSchool"), college: manOf("eduCollege") },
       donation: manOf("donation"),
       rent: manOf("rent"),
-      spouseDependent: mode === "single" && $("spouseDependent").checked,
-      singleParent: mode === "single" && $("singleParent").checked,
+      rentEligible: $("rentEligible").checked,
+      spouseDependent: single && $("spouseDependent").checked,
+      singleParent: single && $("singleParent").checked,
       autoInsurance: $("autoInsurance").checked
     };
+  }
+
+  /* ---------------- 단위 가드 ---------------- */
+  /* 만원 칸에 원 단위 금액을 넣는 사고를 막습니다. */
+  var BIG_MAN = 100000;          // 10억원 이상이면 단위 확인 경고
+  var MAN_FIELDS = [
+    "hGross", "wGross",
+    "hCardCredit", "hCardCheck", "hCardTraditional", "hCardTransit", "hCardCulture",
+    "wCardCredit", "wCardCheck", "wCardTraditional", "wCardTransit", "wCardCulture",
+    "childCard", "depCardCredit", "depCardCheck", "depCardTraditional",
+    "hPensionSaving", "hIrp", "wPensionSaving", "wIrp", "hInsurance", "wInsurance",
+    "medUnlimited", "medGeneral", "eduSchool", "eduCollege", "donation", "rent"
+  ];
+  var WON_FIELDS = ["hPrepaid", "wPrepaid"];
+  var warnEls = {};
+
+  function setupGuards() {
+    MAN_FIELDS.concat(WON_FIELDS).forEach(function (id) {
+      var el = $(id);
+      if (!el || warnEls[id]) return;
+      var field = el.closest(".field");
+      if (!field || !field.parentNode) return;
+      var w = document.createElement("span");
+      w.className = "field-warn";
+      w.hidden = true;
+      field.parentNode.insertBefore(w, field.nextSibling);
+      warnEls[id] = w;
+    });
+  }
+
+  function setWarn(id, html) {
+    var w = warnEls[id];
+    if (!w) return;
+    if (html) {
+      w.innerHTML = html;
+      w.hidden = false;
+    } else {
+      w.hidden = true;
+      w.innerHTML = "";
+    }
+  }
+
+  function updateGuards() {
+    MAN_FIELDS.forEach(function (id) {
+      var v = numOf(id);
+      if (v >= BIG_MAN) {
+        var text = nf.format(v) + "만원 = " + nf.format(Math.round(v / 10000)) + "억원입니다. ";
+        var btn = "";
+        if (v % 10000 === 0) {
+          btn = '<button type="button" class="warn-btn" data-convert="' + id + '">원→만원으로 바꾸기 (' +
+            nf.format(v / 10000) + ')</button>';
+        }
+        setWarn(id, "만원 단위 칸입니다. " + text + "원 단위로 입력한 것은 아닌지 확인해 주세요." + btn);
+      } else {
+        setWarn(id, "");
+      }
+    });
+
+    var grossWon = manOf("hGross") + (mode === "single" ? 0 : manOf("wGross"));
+    WON_FIELDS.forEach(function (id) {
+      var v = numOf(id);
+      if (v > 0 && v < 5000) {
+        setWarn(id, "원 단위 칸입니다. " + nf.format(v) + "원은 너무 작습니다. " +
+          nf.format(v * 10000) + "원을 의도한 것은 아닌지 확인해 주세요.");
+      } else if (grossWon > 0 && v > grossWon) {
+        setWarn(id, "기납부세액이 총급여(" + won(grossWon) + ")보다 큽니다. 단위를 확인해 주세요.");
+      } else {
+        setWarn(id, "");
+      }
+    });
   }
 
   /* ---------------- 결과 그리기 ---------------- */
@@ -169,6 +249,20 @@
     };
   }
 
+  function toolsBlock() {
+    if (isDemo) {
+      return '<div class="result-tools">' +
+        '<span class="demo-badge">예시 데이터로 계산 중</span>' +
+        '<span class="demo-text">아래 숫자는 예시입니다. 한 칸이라도 고치면 이 배지가 사라집니다.</span>' +
+        '<button type="button" class="btn-tool is-primary" data-act="clear">내 값 입력하기</button>' +
+        "</div>";
+    }
+    return '<div class="result-tools">' +
+      '<button type="button" class="btn-tool" data-act="clear">모두 지우기</button>' +
+      '<button type="button" class="btn-tool" data-act="demo">예시 불러오기</button>' +
+      "</div>";
+  }
+
   function scenarioCard(name, sc, isBest) {
     var line = refundLine(sc.total);
     var valCls = line.cls === "pos" ? "pos" : (line.cls === "neg" ? "neg" : "");
@@ -181,6 +275,11 @@
       (isBest ? '<span class="badge-best">추천</span>' : "") + "</div>" +
       '<div class="scenario-value ' + valCls + '">' + line.big + "</div>" +
       '<div class="scenario-meta">' + meta + "</div></div>";
+  }
+
+  function childCreditOf(kids) {
+    var n = kids.filter(function (k) { return (2026 - k.birthYear) <= 20 && k.birthYear <= 2016; }).length;
+    return n === 0 ? 0 : (n === 1 ? 250000 : (n === 2 ? 550000 : 550000 + (n - 2) * 400000));
   }
 
   function buildPlan(out) {
@@ -197,14 +296,16 @@
       var kids = childGroups[who];
       if (!kids.length) return;
       var years = kids.map(function (k) { return k.birthYear + "년"; }).join("·");
-      var creditCount = kids.filter(function (k) { return (2026 - k.birthYear) <= 20 && k.birthYear <= 2016; }).length;
-      var credit = creditCount === 0 ? 0 : (creditCount === 1 ? 250000 : (creditCount === 2 ? 550000 : 550000 + (creditCount - 2) * 400000));
+      var credit = childCreditOf(kids);
+      var disabledKids = kids.filter(function (k) { return k.disabled; }).length;
       items.push("자녀 " + kids.length + "명(" + years + "생) → <b>" + (who === 0 ? H : W) + "</b> · 기본공제 " +
-        manwon(kids.length * 1500000) + (credit ? " + 자녀세액공제 " + manwon(credit) : " (자녀세액공제 대상 아님)"));
+        manwon(kids.length * 1500000) +
+        (disabledKids ? " + 장애인 추가공제 " + manwon(disabledKids * 2000000) : "") +
+        (credit ? " + 자녀세액공제 " + manwon(credit) : " (자녀세액공제 대상 아님)"));
     });
 
     if (h.parents.count > 0) {
-      items.push("부모님 등 부양가족 " + h.parents.count + "명 → <b>" + (a.parentOwner === 0 ? H : W) + "</b> · 기본공제 " +
+      items.push("부모님 등 직계존속 " + h.parents.count + "명 → <b>" + (a.parentOwner === 0 ? H : W) + "</b> · 기본공제 " +
         manwon(h.parents.count * 1500000) +
         (h.parents.seniors ? " + 경로우대 " + manwon(h.parents.seniors * 1000000) : "") +
         (h.parents.disabled ? " + 장애인 " + manwon(h.parents.disabled * 2000000) : ""));
@@ -221,7 +322,9 @@
         " (다른 쪽 " + manwon(target === H ? wThresh : hThresh) + ")");
     }
 
-    if (h.rent > 0) {
+    if (h.rent > 0 && !h.rentEligible) {
+      items.push("월세 " + manwon(h.rent) + "을 입력했지만 <b>무주택 세대주 요건</b>을 체크하지 않아 세액공제에서 제외했습니다.");
+    } else if (h.rent > 0) {
       var renter = a.rentOwner === 0 ? H : W;
       items.push("월세 " + manwon(h.rent) + " → <b>" + renter + "</b> · 총급여 " +
         ((a.rentOwner === 0 ? h.husband.gross : h.wife.gross) <= 55000000 ? "5,500만원 이하 17%" : "15%") + " 구간");
@@ -243,7 +346,13 @@
     items.push("카드·연금저축은 각자 명의 그대로 계산합니다 (맞벌이는 서로 합산 불가)");
 
     [out.optimal.husband, out.optimal.wife].forEach(function (p, i) {
-      if (!p || !p.standardCreditApplied) return;
+      if (!p) return;
+      var overPension = (p.input.pensionPaid + p.input.irpPaid) - p.bases.pension.total;
+      if (overPension > 0) {
+        items.push((i === 0 ? H : W) + "의 연금저축·IRP 납입액 중 <b>" + manwon(overPension) +
+          "</b>은 한도(연금저축 600만·합산 900만원)를 넘어 공제되지 않았습니다.");
+      }
+      if (!p.standardCreditApplied) return;
       items.push((i === 0 ? H : W) + "는 특별세액공제 합계가 13만원보다 적어 <b>표준세액공제 13만원</b>을 적용했습니다. " +
         "대신 건강·고용보험료 소득공제(" + manwon(p.healthDeductionIfSpecial) + ")를 포기한 결과입니다.");
     });
@@ -267,7 +376,8 @@
     rows.push(["근로소득공제", "-" + won(p.earnedDeduction), "총급여 " + won(p.gross) + " 기준"]);
     rows.push(["근로소득금액", won(p.earnedIncome), ""]);
     rows.push(["인적공제", "-" + won(p.personal.total), "기본공제 " + p.personal.basicCount + "명(본인 포함)" +
-      (p.personal.senior ? " + 경로우대" : "") + (p.personal.disabled ? " + 장애인" : "")]);
+      (p.personal.senior ? " + 경로우대 " + won(p.personal.senior) : "") +
+      (p.personal.disabled ? " + 장애인 " + won(p.personal.disabled) + "(자녀 " + p.personal.disabledChildren + "명 포함)" : "")]);
     if (p.pensionDeduction) rows.push(["국민연금 보험료", "-" + won(p.pensionDeduction), ""]);
     if (p.healthDeduction) rows.push(["건강·장기요양·고용보험료", "-" + won(p.healthDeduction), ""]);
     if (p.cardDeductionApplied || p.cardFamily) {
@@ -281,7 +391,9 @@
     rows.push(["산출세액", won(p.calculatedTax), ""]);
     if (c.earnedIncome) rows.push(["근로소득세액공제", "-" + won(c.earnedIncome), ""]);
     if (c.child) rows.push(["자녀세액공제", "-" + won(c.child), ""]);
-    if (c.pension) rows.push(["연금계좌 세액공제", "-" + won(c.pension), ""]);
+    if (c.pension) rows.push(["연금계좌 세액공제", "-" + won(c.pension),
+      "연금저축 " + manwon(p.bases.pension.savings) + " + IRP·DC " + manwon(p.bases.pension.irp) +
+      " × " + pct(p.bases.pensionRate)]);
     if (c.insurance) rows.push(["보장성보험 세액공제", "-" + won(c.insurance), ""]);
     if (c.medical) rows.push(["의료비 세액공제", "-" + won(c.medical), "공제대상 " + manwon(p.bases.medical) + " (문턱 " + manwon(p.bases.medicalThreshold) + ")"]);
     if (c.education) rows.push(["교육비 세액공제", "-" + won(c.education), "공제대상 " + manwon(p.bases.education)]);
@@ -308,6 +420,8 @@
       "</div></details>";
   }
 
+  var HOUSE_CHIP = '<p class="info-chip">주택자금 공제(주택청약저축·전세대출 원리금·주담대 이자)는 아직 반영하지 않았습니다. 해당되면 실제 환급액이 이보다 클 수 있습니다.</p>';
+
   function renderCouple(out) {
     var opt = out.optimal;
     var line = refundLine(opt.total);
@@ -328,9 +442,11 @@
 
     return '<div class="result-card">' +
       '<div class="result-head"><h2>계산 결과</h2><span class="stamp">2026년 귀속 · 최적 분할</span></div>' +
+      toolsBlock() +
       '<p class="result-big ' + line.cls + '">' + line.big + "</p>" +
       '<p class="result-sub">' + line.sub + "</p>" +
       '<p class="result-note">' + line.note + "</p>" +
+      HOUSE_CHIP +
       '<div class="scenario-list">' +
       scenarioCard("남편에게 몰아주기", out.husbandAll, false) +
       scenarioCard("아내에게 몰아주기", out.wifeAll, false) +
@@ -351,40 +467,68 @@
     var line = refundLine(out.scenario.total);
     return '<div class="result-card">' +
       '<div class="result-head"><h2>계산 결과</h2><span class="stamp">2026년 귀속</span></div>' +
+      toolsBlock() +
       '<p class="result-big ' + line.cls + '">' + line.big + "</p>" +
       '<p class="result-sub">' + line.sub + "</p>" +
       '<p class="result-note">' + line.note + "</p>" +
+      HOUSE_CHIP +
       '<div class="plan" style="margin-top:14px"><h3>적용된 공제</h3><ul>' +
       singlePlan(out).map(function (t) { return "<li>" + t + "</li>"; }).join("") +
       "</ul></div>" +
       breakdownTable(p, "본인") +
-      '<p class="small-note">결과는 소득세 기준이며, 결정세액의 10%인 지방소득세가 함께 정산됩니다.</p>' +
+      '<p class="small-note">결과는 소득세 기준이며, 결정세액의 10%인 지방소득세가 함께 정산됩니다. ' +
+      "입력하지 않은 공제(주택자금·청약저축 등)는 반영되지 않았습니다.</p>" +
       "</div>";
   }
 
   function singlePlan(out) {
     var p = out.scenario.husband;
+    var h = out.household;
     var items = [];
     items.push("근로소득공제 " + manwon(p.earnedDeduction) + " 자동 적용");
-    items.push("인적공제 " + manwon(p.personal.total) + " (기본공제 " + p.personal.basicCount + "명)");
+    items.push("인적공제 " + manwon(p.personal.total) + " (기본공제 " + p.personal.basicCount + "명" +
+      (p.personal.disabledChildren ? " · 자녀 장애인 추가공제 " + manwon(p.personal.disabledChildren * 2000000) : "") + ")");
     if (p.cardFamily) items.push("배우자·부양가족 카드 사용액 " + manwon(p.cardFamily) + "을 본인 카드와 합산 (합계 " +
       manwon(p.card.total) + ", 문턱 " + manwon(p.card.threshold) + ")");
     if (p.card.deduction) items.push("신용카드 등 소득공제 " + manwon(p.cardDeductionApplied));
     if (p.credits.child) items.push("자녀세액공제 " + manwon(p.credits.child));
-    if (p.credits.pension) items.push("연금계좌 세액공제 " + manwon(p.credits.pension));
+    if (p.credits.pension) items.push("연금계좌 세액공제 " + manwon(p.credits.pension) + " (연금저축 " +
+      manwon(p.bases.pension.savings) + " + IRP·DC " + manwon(p.bases.pension.irp) + ")");
+    var overPension = (p.input.pensionPaid + p.input.irpPaid) - p.bases.pension.total;
+    if (overPension > 0) items.push("연금저축·IRP 납입액 중 " + manwon(overPension) + "은 한도(연금저축 600만·합산 900만원) 초과로 공제되지 않음");
     if (p.credits.medical) items.push("의료비 세액공제 " + manwon(p.credits.medical));
     if (p.credits.education) items.push("교육비 세액공제 " + manwon(p.credits.education));
-    if (p.credits.rent) items.push("월세 세액공제 " + manwon(p.credits.rent));
+    if (h.rent > 0 && !h.rentEligible) {
+      items.push("월세 " + manwon(h.rent) + "은 무주택 세대주 요건을 체크하지 않아 공제에서 제외");
+    } else if (p.credits.rent) {
+      items.push("월세 세액공제 " + manwon(p.credits.rent));
+    }
     if (p.credits.standard) items.push("표준세액공제 13만원 적용 (특별세액공제보다 유리)");
     return items;
   }
 
+  function renderEmpty() {
+    return '<div class="result-card">' +
+      '<div class="result-head"><h2>계산 결과</h2><span class="stamp">2026년 귀속</span></div>' +
+      toolsBlock() +
+      '<div class="empty-state">' +
+      "<strong>총급여를 입력하면 예상 환급액이 나타납니다</strong>" +
+      "<p>1단계 ‘소득과 기납부세액’에 총급여(만원)를 넣어 주세요. 원천징수영수증의 ‘총급여’ 칸 숫자입니다.</p>" +
+      "</div></div>";
+  }
+
   /* ---------------- 미니바 ---------------- */
-  function updateMini(out) {
+  function updateMini(out, empty) {
     var bar = $("miniBar");
     var label = $("miniLabel");
     var value = $("miniValue");
-    if (!bar) return;
+    if (!bar || !label || !value) return;
+    if (empty) {
+      label.textContent = "총급여를 입력하면 결과가 나옵니다";
+      value.textContent = "—";
+      value.style.color = "#16202e";
+      return;
+    }
     if (out.single) {
       var line = refundLine(out.scenario.total);
       label.textContent = line.sub;
@@ -403,14 +547,18 @@
   function render() {
     var out;
     try {
-      out = YECalc.run(readState());
+      var state = readState();
+      out = YECalc.run(state);
+      var totalGross = state.husband.gross + (state.mode === "single" ? 0 : state.wife.gross);
+      var empty = totalGross <= 0;
+      $("results").innerHTML = empty ? renderEmpty() : (out.single ? renderSingle(out) : renderCouple(out));
+      updateMini(out, empty);
     } catch (e) {
       console.error(e);
       $("results").innerHTML = '<div class="result-card"><p>입력값을 확인해 주세요.</p></div>';
-      return;
+      updateMini(null, true);
     }
-    $("results").innerHTML = out.single ? renderSingle(out) : renderCouple(out);
-    updateMini(out);
+    updateGuards();
   }
   function scheduleRender() {
     clearTimeout(timer);
@@ -419,6 +567,7 @@
 
   /* ---------------- 모드 전환 ---------------- */
   function setMode(next) {
+    var wasDemo = isDemo;
     mode = next;
     var couple = next === "couple";
     $("tabSingle").classList.toggle("is-active", !couple);
@@ -437,49 +586,90 @@
     Array.prototype.forEach.call(document.querySelectorAll(".mode-single-only"), function (el) {
       el.hidden = couple;
     });
-    render();
+    /* 예시 상태에서 모드를 바꾸면 그 모드에 맞는 예시로 다시 채웁니다.
+       (맞벌이 예시의 자녀·카드 값이 1인 모드에 남지 않도록) */
+    if (wasDemo) applyDemo(next);
+    else render();
   }
 
-  /* ---------------- 초기값 ---------------- */
-  /* 예시 값 (카드·의료비·교육비·연금은 만원, 총급여는 만원, 기납부세액은 원 단위) */
-  var DEMO = {
+  /* ---------------- 예시 값·초기화 ---------------- */
+  /* 카드·의료비·교육비·연금·월세는 만원, 총급여는 만원, 기납부세액은 원 단위 */
+  var DEMO_COUPLE = {
     hGross: "6,000", hPrepaid: "2,400,000", wGross: "4,000", wPrepaid: "900,000",
     hCardCredit: "1,800", hCardCheck: "600", hCardTraditional: "60", hCardTransit: "80", hCardCulture: "0",
     wCardCredit: "1,200", wCardCheck: "500", wCardTraditional: "40", wCardTransit: "60", wCardCulture: "0",
-    childCard: "120", hPension: "300", hInsurance: "72", wPension: "0", wInsurance: "60",
+    childCard: "120",
+    hPensionSaving: "300", hIrp: "0", hInsurance: "72",
+    wPensionSaving: "0", wIrp: "0", wInsurance: "60",
     medUnlimited: "100", medGeneral: "200", eduSchool: "600", eduCollege: "0", donation: "0", rent: "0",
-    pCount: "0", pSenior: "0", pDisabled: "0"
+    pCount: "0", pSenior: "0", pDisabled: "0",
+    __children: [{ birthYear: 2012, school: "school" }, { birthYear: 2015, school: "school" }]
+  };
+  var DEMO_SINGLE = {
+    hGross: "4,500", hPrepaid: "1,800,000",
+    hCardCredit: "1,200", hCardCheck: "400", hCardTraditional: "40", hCardTransit: "50", hCardCulture: "0",
+    childCard: "0",
+    hPensionSaving: "200", hIrp: "0", hInsurance: "60",
+    medUnlimited: "50", medGeneral: "0", eduSchool: "0", eduCollege: "0", donation: "0", rent: "0",
+    pCount: "0", pSenior: "0", pDisabled: "0",
+    __children: []
   };
 
-  function applyDemo() {
-    Object.keys(DEMO).forEach(function (id) { $(id).value = DEMO[id]; });
-    ["depCardCredit", "depCardCheck", "depCardTraditional"].forEach(function (id) { $(id).value = "0"; });
+  function allInputIds() {
+    return MAN_FIELDS.concat(WON_FIELDS).concat(["pCount", "pSenior", "pDisabled"]);
+  }
+
+  function applyDemo(nextMode) {
+    var src = (nextMode || mode) === "single" ? DEMO_SINGLE : DEMO_COUPLE;
+    applying = true;
+    allInputIds().forEach(function (id) {
+      var el = $(id);
+      if (el) el.value = "0";
+    });
+    Object.keys(src).forEach(function (id) {
+      if (id.charAt(0) === "_") return;
+      if ($(id)) $(id).value = src[id];
+    });
     $("autoInsurance").checked = true;
     $("spouseDependent").checked = false;
     $("singleParent").checked = false;
+    if ($("rentEligible")) $("rentEligible").checked = false;
     var box = $("children");
     box.innerHTML = "";
-    box.appendChild(childRow(2012, "school"));
-    box.appendChild(childRow(2015, "school"));
+    (src.__children || []).forEach(function (c) {
+      box.appendChild(childRow(c.birthYear, c.school, c.disabled));
+    });
+    applying = false;
+    isDemo = true;
     render();
   }
 
-  function clearAll() {
-    ["hGross", "hPrepaid", "wGross", "wPrepaid", "hCardCredit", "hCardCheck", "hCardTraditional",
-      "hCardTransit", "hCardCulture", "wCardCredit", "wCardCheck", "wCardTraditional", "wCardTransit",
-      "wCardCulture", "childCard", "depCardCredit", "depCardCheck", "depCardTraditional",
-      "hPension", "hInsurance", "wPension", "wInsurance",
-      "medUnlimited", "medGeneral", "eduSchool", "eduCollege", "donation", "rent",
-      "pCount", "pSenior", "pDisabled"].forEach(function (id) { $(id).value = "0"; });
+  function clearAll(focus) {
+    applying = true;
+    allInputIds().forEach(function (id) {
+      var el = $(id);
+      if (el) el.value = "0";
+    });
+    $("spouseDependent").checked = false;
+    $("singleParent").checked = false;
+    if ($("rentEligible")) $("rentEligible").checked = false;
     $("children").innerHTML = "";
+    applying = false;
+    isDemo = false;
     render();
+    if (focus !== false) {
+      var g = $("hGross");
+      if (g) {
+        try { g.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { g.scrollIntoView(); }
+        g.focus({ preventScroll: true });
+      }
+    }
   }
 
   /* ---------------- 이벤트 ---------------- */
   document.addEventListener("DOMContentLoaded", function () {
-    renderChildren();
-    childrenInitialized = true;
-    $("miniBar").hidden = false;
+    setupGuards();
+    if ($("miniBar")) $("miniBar").hidden = false;
 
     $("tabSingle").addEventListener("click", function () { setMode("single"); });
     $("tabCouple").addEventListener("click", function () { setMode("couple"); });
@@ -488,6 +678,7 @@
       var rows = document.querySelectorAll("#children .child-row").length;
       if (rows >= 6) return;
       $("children").appendChild(childRow(2016, "school"));
+      isDemo = false;
       render();
     });
 
@@ -500,6 +691,7 @@
       } else {
         btn.closest(".child-row").remove();
       }
+      isDemo = false;
       render();
     });
 
@@ -508,12 +700,16 @@
         var d = digits(e.target.value);
         if (d && d.length > 4) e.target.value = d.slice(0, 4);
       }
+      if (!applying) isDemo = false;
       scheduleRender();
     });
-    $("formArea").addEventListener("change", scheduleRender);
+    $("formArea").addEventListener("change", function (e) {
+      if (!applying) isDemo = false;
+      scheduleRender();
+    });
     $("formArea").addEventListener("focusout", function (e) {
       if (e.target.matches("input[type=text]") && !e.target.classList.contains("child-birth")) {
-        fmtInput(e.target, e.target.id === "hPrepaid" || e.target.id === "wPrepaid" ? "" : "");
+        fmtInput(e.target);
       }
       if (e.target.matches(".child-birth")) {
         var d = digits(e.target.value);
@@ -521,18 +717,33 @@
       }
     });
 
-    $("resetBtn").addEventListener("click", clearAll);
-    $("demoBtn").addEventListener("click", applyDemo);
+    $("resetBtn").addEventListener("click", function () { clearAll(true); });
+    $("demoBtn").addEventListener("click", function () { applyDemo(); });
     $("miniJump").addEventListener("click", function () {
       $("results").scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
-    render();
-  });
+    /* 결과 카드 안의 버튼(모두 지우기 · 예시 불러오기 · 내 값 입력하기) */
+    $("results").addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      var act = btn.getAttribute("data-act");
+      if (act === "clear") clearAll(true);
+      else if (act === "demo") applyDemo();
+    });
 
-  // 스크립트가 DOM 뒤에 있어 바로 실행되는 경우를 위한 안전장치
-  if (document.readyState !== "loading" && !childrenInitialized) {
-    renderChildren();
-    render();
-  }
+    /* 단위 가드의 원→만원 자동 환산 */
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-convert]");
+      if (!b) return;
+      var el = $(b.getAttribute("data-convert"));
+      if (!el) return;
+      var v = digits(el.value) ? Number(digits(el.value)) : 0;
+      el.value = nf.format(Math.round(v / 10000));
+      isDemo = false;
+      render();
+    });
+
+    applyDemo("couple");
+  });
 })();

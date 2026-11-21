@@ -120,16 +120,16 @@
               <h3>자녀</h3>
               <button type="button" id="addChild" class="btn-mini">+ 자녀 추가</button>
             </div>
-            <p class="card-help">출생연도로 기본공제(20세 이하)와 자녀세액공제(2026년 9세 이상, 2017년생 제외)를 판정합니다.</p>
+            <p class="card-help">출생연도로 기본공제(20세 이하)와 자녀세액공제(2026년 9세 이상, 2017년생 제외)를 판정합니다. 장애 자녀는 ‘장애’를 체크하면 장애인 추가공제 200만원이 함께 적용됩니다.</p>
             <div id="children" class="children"></div>
           </div>
 
           <div class="sub-block">
-            <h3>부모님 등 부양가족</h3>
-            <p class="card-help">만 60세 이상 직계존속이 대상입니다. 70세 이상은 경로우대 100만원, 장애인은 200만원이 더해집니다.</p>
+            <h3>부모님 등 직계존속</h3>
+            <p class="card-help">만 60세 이상 직계존속이 대상입니다. <strong>배우자·자녀는 위에서 따로 입력</strong>하므로 여기에 더하지 마세요. 70세 이상은 경로우대 100만원, 장애인은 200만원이 더해집니다.</p>
             <div class="grid-3">
               <label class="field">
-                <span class="field-label">부양가족 수</span>
+                <span class="field-label">직계존속 수 <em>(만 60세 이상)</em></span>
                 <span class="input-wrap"><input id="pCount" type="text" inputmode="numeric" value="0"><span class="unit">명</span></span>
               </label>
               <label class="field">
@@ -194,20 +194,23 @@
 
         <!-- 연금·보험 -->
         <fieldset class="card">
-          <legend class="card-title"><span class="step">4</span> 연금저축·보장성보험</legend>
+          <legend class="card-title"><span class="step">4</span> 연금저축·IRP·보장성보험</legend>
+          <p class="card-help">연금저축은 연 600만원, IRP·DC를 합치면 900만원까지 공제됩니다. 총급여 5,500만원 이하 15%, 초과 12%.</p>
           <div class="grid-2 pair-grid">
             <div class="person-col">
               <h3 class="person-name" id="hPensionName">남편</h3>
-              <label class="field"><span class="field-label">연금저축 + IRP 납입액</span><span class="input-wrap"><input id="hPension" type="text" inputmode="numeric" value="300"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">연금저축 납입액 <em>(연 600만원 한도)</em></span><span class="input-wrap"><input id="hPensionSaving" type="text" inputmode="numeric" value="300"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">IRP·DC 납입액 <em>(합산 900만원 한도)</em></span><span class="input-wrap"><input id="hIrp" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
               <label class="field"><span class="field-label">보장성보험료</span><span class="input-wrap"><input id="hInsurance" type="text" inputmode="numeric" value="72"><span class="unit">만원</span></span></label>
             </div>
             <div class="person-col" id="wifePensionCol">
               <h3 class="person-name">아내</h3>
-              <label class="field"><span class="field-label">연금저축 + IRP 납입액</span><span class="input-wrap"><input id="wPension" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">연금저축 납입액 <em>(연 600만원 한도)</em></span><span class="input-wrap"><input id="wPensionSaving" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">IRP·DC 납입액 <em>(합산 900만원 한도)</em></span><span class="input-wrap"><input id="wIrp" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
               <label class="field"><span class="field-label">보장성보험료</span><span class="input-wrap"><input id="wInsurance" type="text" inputmode="numeric" value="60"><span class="unit">만원</span></span></label>
             </div>
           </div>
-          <p class="hint">연금계좌는 연금저축 600만원 + IRP 합산 900만원까지 공제됩니다. 총급여 5,500만원 이하 15%, 초과 12%.</p>
+          <p class="hint">연금저축만 넣으면 600만원까지, 연금저축 600만원 + IRP·DC 300만원이면 합산 900만원까지 인정됩니다. 연금저축에 900만원을 넣어도 600만원만 공제되고 나머지 300만원은 IRP·DC 납입분으로만 채울 수 있습니다.</p>
           <p class="hint mode-single-only" id="pensionSingleNote" hidden><strong>연금저축·IRP는 본인 명의 납입분만</strong> 공제됩니다. 배우자·자녀 등 가족 명의로 납입한 금액은 합산할 수 없습니다. 보장성보험료는 본인 + 기본공제 대상 가족 합산 금액을 입력하세요.</p>
         </fieldset>
 
@@ -240,15 +243,16 @@
               <span class="input-wrap"><input id="rent" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span>
             </label>
           </div>
-          <p class="hint">의료비는 총급여의 3%를 넘는 금액부터 15%가 공제됩니다. 월세는 무주택 세대주(또는 요건을 갖춘 배우자)만 대상입니다.</p>
+          <label class="check"><input id="rentEligible" type="checkbox"> 무주택 세대주 요건 충족 <em>(또는 요건을 갖춘 배우자)</em></label>
+          <p class="hint">의료비는 총급여의 3%를 넘는 금액부터 15%가 공제됩니다. 월세는 <strong>무주택 세대주</strong>만 대상이라 위 요건을 체크해야 공제에 반영됩니다. 체크하지 않으면 월세를 입력해도 세액공제는 0원입니다.</p>
           <p class="hint mode-single-only" id="medicalSingleNote" hidden><strong>의료비·보장성보험료는 본인 + 기본공제 대상 가족(배우자·자녀·부모님) 합산 금액</strong>을 입력하세요. 교육비는 기본공제 대상 자녀만 공제되며, <strong>부모님 교육비는 공제되지 않습니다.</strong></p>
         </fieldset>
 
         <div class="form-foot">
           <label class="check"><input id="autoInsurance" type="checkbox" checked> 4대보험료 자동 계산 <span class="muted">(국민연금 4.75%·건강보험 3.595%·장기요양 13.14%·고용 0.9%)</span></label>
           <div class="form-buttons">
-            <button type="button" id="resetBtn" class="btn-ghost">입력 지우기</button>
-            <button type="button" id="demoBtn" class="btn-ghost">예시 값으로</button>
+            <button type="button" id="resetBtn" class="btn-ghost">모두 지우기</button>
+            <button type="button" id="demoBtn" class="btn-ghost">예시 불러오기</button>
           </div>
         </div>
       </form>

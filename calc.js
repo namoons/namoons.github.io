@@ -34,7 +34,9 @@
     INSURANCE_RATE: 0.12,
     INSURANCE_CAP: 1000000,
 
-    PENSION_CAP: 9000000,       // 연금저축 600만 + IRP 합산 900만
+    PENSION_SAVING_CAP: 6000000, // 연금저축 단독 한도 600만원
+    PENSION_TOTAL_CAP: 9000000,  // 연금저축 + IRP·DC 합산 한도 900만원
+    PENSION_CAP: 9000000,        // (호환용) 합산 한도
     PENSION_LOW_GROSS: 55000000,
 
     RENT_CAP: 10000000,
@@ -132,6 +134,16 @@
     if (count === 1) return 250000;
     if (count === 2) return 550000;
     return 550000 + (count - 2) * 400000;
+  }
+
+  /* 연금계좌 세액공제 한도
+     - 연금저축 단독 600만원, IRP·DC를 합치면 900만원까지
+     - 연금저축을 600만원 넘게 넣어도 600만원까지만 인정되고,
+       남은 300만원은 IRP·DC 납입분으로만 채울 수 있습니다. */
+  function pensionApplied(savingsPaid, irpPaid) {
+    var savings = Math.min(num(savingsPaid), C.PENSION_SAVING_CAP);
+    var irp = Math.min(num(irpPaid), Math.max(0, C.PENSION_TOTAL_CAP - savings));
+    return { savings: savings, irp: irp, total: savings + irp };
   }
 
   /* 신용카드 등 소득공제 (조특법 §126의2, 2026년 사용분) */
@@ -233,12 +245,14 @@
     var earnedDeduction = earnedIncomeDeduction(gross);
     var earnedIncome = Math.max(0, gross - earnedDeduction);
 
-    /* 2. 인적공제 */
+    /* 2. 인적공제 (장애인 추가공제는 부모님·자녀 모두 포함) */
     var parentCount = Math.max(0, Math.floor(parents.count || 0));
     var basicCount = 1 + children.length + (p.spouseDependent ? 1 : 0) + parentCount;
     var basic = basicCount * C.BASIC;
     var senior = Math.min(Math.max(0, Math.floor(parents.seniors || 0)), parentCount) * C.SENIOR;
-    var disabled = Math.min(Math.max(0, Math.floor(parents.disabled || 0)), parentCount) * C.DISABLED;
+    var disabledParents = Math.min(Math.max(0, Math.floor(parents.disabled || 0)), parentCount);
+    var disabledChildren = children.filter(function (c) { return !!c.disabled; }).length;
+    var disabled = (disabledParents + disabledChildren) * C.DISABLED;
     var singleParent = p.singleParent ? C.SINGLE_PARENT : 0;
     var personalRaw = basic + senior + disabled + singleParent;
     var personal = Math.min(personalRaw, earnedIncome); // 인적공제 ≤ 종합소득금액
@@ -274,9 +288,9 @@
     /* 6. 세액공제 */
     var earnedCredit = earnedIncomeTaxCredit(calculatedTax, gross);
     var childCredit = childTaxCredit(p.childCreditCount || 0);
+    var pensionSplit = pensionApplied(p.pensionPaid, p.irpPaid);
     var pensionCredit = Math.floor(
-      Math.min(num(p.pensionPaid), C.PENSION_CAP) *
-      (gross <= C.PENSION_LOW_GROSS ? 0.15 : 0.12)
+      pensionSplit.total * (gross <= C.PENSION_LOW_GROSS ? 0.15 : 0.12)
     );
 
     var medGeneral = Math.min(num(p.medical && p.medical.general), C.MED_GENERAL_CAP);
@@ -301,7 +315,10 @@
     var insuranceBase = Math.min(num(p.insurancePaid), C.INSURANCE_CAP);
     var insuranceCredit = Math.floor(insuranceBase * C.INSURANCE_RATE);
 
-    var rentBase = Math.min(num(p.rent), C.RENT_CAP);
+    /* 월세는 무주택 세대주(또는 요건을 갖춘 배우자)만 대상입니다.
+       요건 확인을 체크하지 않으면 공제하지 않습니다. */
+    var rentEligible = p.rentEligible === true;
+    var rentBase = rentEligible ? Math.min(num(p.rent), C.RENT_CAP) : 0;
     var rentRate = gross <= C.RENT_HIGH_GROSS ? 0.17 : (gross <= C.RENT_LOW_GROSS ? 0.15 : 0);
     var rentCredit = Math.floor(rentBase * rentRate);
 
@@ -352,6 +369,8 @@
         basic: basic,
         senior: senior,
         disabled: disabled,
+        disabledParents: disabledParents,
+        disabledChildren: disabledChildren,
         singleParent: singleParent,
         total: personal
       },
@@ -378,6 +397,9 @@
         used: best.usedCredits
       },
       bases: {
+        pension: pensionSplit,
+        pensionRate: gross <= C.PENSION_LOW_GROSS ? 0.15 : 0.12,
+        rentEligible: rentEligible,
         medical: medBase,
         medicalThreshold: medThreshold,
         medicalGeneral: medGeneral,
@@ -430,6 +452,7 @@
         gross: num(husband.gross),
         prepaid: num(husband.prepaid),
         pension: num(husband.pension),
+        irp: num(husband.irp),
         insurance: num(husband.insurance),
         card: {
           credit: num(husband.card && husband.card.credit),
@@ -443,6 +466,7 @@
         gross: num(wife.gross),
         prepaid: num(wife.prepaid),
         pension: num(wife.pension),
+        irp: num(wife.irp),
         insurance: num(wife.insurance),
         card: {
           credit: num(wife.card && wife.card.credit),
@@ -455,7 +479,8 @@
       children: (h.children || []).map(function (c) {
         return {
           birthYear: Number(c.birthYear) || 2016,
-          school: ["preschool", "school", "college", "none"].indexOf(c.school) >= 0 ? c.school : "school"
+          school: ["preschool", "school", "college", "none"].indexOf(c.school) >= 0 ? c.school : "school",
+          disabled: !!c.disabled
         };
       }),
       parents: {
@@ -482,6 +507,7 @@
       },
       donation: num(h.donation),
       rent: num(h.rent),
+      rentEligible: !!h.rentEligible,
       spouseDependent: !!h.spouseDependent,
       singleParent: !!h.singleParent,
       autoInsurance: h.autoInsurance !== false
@@ -523,6 +549,7 @@
       gross: person.gross,
       prepaid: person.prepaid,
       pensionPaid: person.pension,
+      irpPaid: person.irp,
       insurancePaid: person.insurance,
       card: {
         credit: person.card.credit + familyCard.credit,
@@ -548,6 +575,7 @@
       collegeChildCount: myCollege,
       donation: alloc.donationOwner === which ? h.donation : 0,
       rent: alloc.rentOwner === which ? h.rent : 0,
+      rentEligible: h.rentEligible,
       autoInsurance: h.autoInsurance
     };
   }
@@ -690,6 +718,7 @@
     earnedIncomeTaxCredit: earnedIncomeTaxCredit,
     childTaxCredit: childTaxCredit,
     cardDeduction: cardDeduction,
+    pensionApplied: pensionApplied,
     nationalPension: nationalPension,
     healthInsurance: healthInsurance,
     computePerson: computePerson,

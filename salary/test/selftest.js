@@ -7,10 +7,15 @@
     var pass = typeof expected === "number" && typeof actual === "number"
       ? Math.abs(expected - actual) <= 1
       : expected === actual;
-    rows.push({ name: name, expected: expected, actual: actual, pass: pass });
+    rows.push({ name: name, expected: expected, actual: actual, pass: pass, ok: pass });
   }
   function checkClose(name, expected, actual, tol) {
-    rows.push({ name: name, expected: expected, actual: actual, pass: Math.abs(expected - actual) <= (tol || 2) });
+    var ok = Math.abs(expected - actual) <= (tol || 2);
+    rows.push({ name: name, expected: expected, actual: actual, pass: ok, ok: ok });
+  }
+
+  function checkTrue(name, actual, note) {
+    check(name, true, !!actual, note);
   }
 
   var C = SalCalc.C;
@@ -163,6 +168,75 @@
   check("5,000만 한계세율 15%", 0.15, t5.tax.margin);
   check("5,000만 2027 월 소득세", 146823, t5.monthly.incomeTax);
   check("공제율 13%대", true, t5.effectiveRate > 0.13 && t5.effectiveRate < 0.14);
+
+
+  /* 13. P0 회귀 — 퇴직금 포함/별도 */
+  var sevSep = SalCalc.compareYears({ annualSalary: 52000000, monthlyNonTaxable: 200000, dependents: 2, children: 1 });
+  check("퇴직금 별도 · 월 세전 = 연봉÷12", 4333333, sevSep.y2027.monthly.gross);
+  var sevInc = SalCalc.compareYears({ annualSalary: 52000000, monthlyNonTaxable: 200000, dependents: 2, children: 1, severanceIncluded: true });
+  check("퇴직금 포함 · 월 세전 = 연봉÷13", 4000000, sevInc.y2027.monthly.gross);
+  checkTrue("퇴직금 포함이면 월 실수령이 더 적다", sevInc.y2027.monthly.net < sevSep.y2027.monthly.net);
+  check("퇴직금 포함/별도 · 연 과세급여는 같다", sevSep.y2027.annual.taxable, sevInc.y2027.annual.taxable);
+  check("퇴직금 포함 표시", true, sevInc.y2027.input.severanceIncluded);
+
+  var mixed = SalCalc.compareOffer({
+    current: { annualSalary: 50000000, monthlyNonTaxable: 200000, incentive: 0, severanceIncluded: false },
+    offer: { annualSalary: 50000000, monthlyNonTaxable: 200000, incentive: 0, severanceIncluded: true },
+    dependents: 2, children: 1
+  });
+  check("같은 연봉 · 현 직장(별도) 퇴직금 1년분", 4166666, mixed.severance.current);
+  check("같은 연봉 · 제안(포함) 퇴직금 1년분", 3846153, mixed.severance.offer);
+  checkTrue("같은 연봉에서 포함 제안의 월 실수령이 낮다", mixed.offer.monthly.net < mixed.current.monthly.net);
+  check("포함/별도 혼합 · 총보상 차이", -4166666, mixed.diff.totalComp, "별도 5,417만 vs 포함 5,000만");
+  check("포함/별도 혼합 · 세전 총보상 인상률 음수", true, mixed.diff.nominalRaise < 0);
+  check("포함 제안 · 총보상 = 연봉", 50000000, mixed.totalComp.offer);
+  check("별도 현 직장 · 총보상 = 연봉 + 퇴직금 1년분", 54166666, mixed.totalComp.current);
+
+  /* 14. P0 회귀 — 자녀세액공제 대상 분리 */
+  var noCreditKid = SalCalc.computePerson({ annualSalary: 50000000, dependents: 3, children: 2, creditChildren: 0 }, 2027);
+  check("자녀 2명 · 세액공제 대상 0명이면 자녀세액공제 0", 0, noCreditKid.tax.childCredit);
+  var oneCreditKid = SalCalc.computePerson({ annualSalary: 50000000, dependents: 3, children: 2, creditChildren: 1 }, 2027);
+  check("자녀 2명 중 1명만 대상 · 자녀세액공제 25만", 250000, oneCreditKid.tax.childCredit);
+  check("자녀세액공제 대상 기본값은 자녀 수", 2, SalCalc.normalizePerson({ annualSalary: 50000000, dependents: 3, children: 2 }).creditChildren);
+  check("자녀세액공제 대상은 자녀 수를 넘을 수 없다", 2, SalCalc.normalizePerson({ annualSalary: 50000000, dependents: 3, children: 2, creditChildren: 5 }).creditChildren);
+  var noCreditPay = SalCalc.compareYears({ annualSalary: 50000000, dependents: 3, children: 2, creditChildren: 0 });
+  var oneCreditPay = SalCalc.compareYears({ annualSalary: 50000000, dependents: 3, children: 2, creditChildren: 1 });
+  check("세액공제 대상 1명 추가 시 연 소득세 25만 감소", 250000, noCreditPay.y2027.annual.incomeTax - oneCreditPay.y2027.annual.incomeTax);
+
+  /* 15. P0 회귀 — 비과세 항목 분리와 한도 초과 과세 전환 */
+  var ntAll = SalCalc.normalizePerson({ annualSalary: 40000000, nonTaxable: { meal: 200000, car: 200000, childcare: 200000, other: 0 }, preschoolChildren: 1 });
+  check("비과세 · 식대+자가운전+보육(1명) = 60만 인정", 600000, ntAll.monthlyNonTaxable);
+  check("비과세 · 전환 0", 0, ntAll.nonTaxable.converted);
+  var ntNoKid = SalCalc.normalizePerson({ annualSalary: 40000000, nonTaxable: { meal: 200000, car: 200000, childcare: 200000 }, preschoolChildren: 0 });
+  check("비과세 · 6세 이하 자녀 0명이면 보육수당 20만 과세 전환", 400000, ntNoKid.monthlyNonTaxable);
+  check("비과세 · 과세 전환액 20만", 200000, ntNoKid.nonTaxable.converted);
+  var ntCarOver = SalCalc.normalizePerson({ annualSalary: 40000000, nonTaxable: { meal: 300000, car: 300000 } });
+  check("비과세 · 항목 한도 초과분은 인정 안 함", 400000, ntCarOver.monthlyNonTaxable);
+  check("비과세 · 초과 20만 과세 전환", 200000, ntCarOver.nonTaxable.converted);
+  var ntOther = SalCalc.normalizePerson({ annualSalary: 40000000, nonTaxable: { meal: 200000, other: 100000 } });
+  check("비과세 · 기타 항목 합산", 300000, ntOther.monthlyNonTaxable);
+  var nt2Kids = SalCalc.normalizePerson({ annualSalary: 40000000, nonTaxable: { childcare: 400000 }, preschoolChildren: 2 });
+  check("비과세 · 보육수당 6세 이하 2명이면 40만", 400000, nt2Kids.monthlyNonTaxable);
+  var ntClamp = SalCalc.normalizePerson({ annualSalary: 6000000, nonTaxable: { meal: 200000, car: 200000, other: 200000 } });
+  check("비과세가 월급보다 크면 월급까지만", 500000, ntClamp.monthlyNonTaxable);
+  check("비과세 · 월급 초과분도 과세 전환", 100000, ntClamp.nonTaxable.converted);
+  var kidPay = SalCalc.compareYears({ annualSalary: 40000000, dependents: 3, children: 2, creditChildren: 1, nonTaxable: { meal: 200000, childcare: 200000 }, preschoolChildren: 1 });
+  var noKidPay = SalCalc.compareYears({ annualSalary: 40000000, dependents: 3, children: 2, creditChildren: 1, nonTaxable: { meal: 200000, childcare: 200000 }, preschoolChildren: 0 });
+  check("보육수당 비과세 반영 · 과세 월급 20만 감소", 200000, noKidPay.y2027.monthly.taxable - kidPay.y2027.monthly.taxable);
+  checkTrue("보육수당 비과세 반영 · 월 실수령 증가", kidPay.y2027.monthly.net > noKidPay.y2027.monthly.net);
+
+  /* 16. 기존 단일 비과세 입력(호환) */
+  var legacy = SalCalc.normalizePerson({ annualSalary: 40000000, monthlyNonTaxable: 600000 });
+  check("구형 단일 입력 · 40만까지 인정", 400000, legacy.monthlyNonTaxable);
+  check("구형 단일 입력 · 20만 과세 전환", 200000, legacy.nonTaxable.converted);
+
+  var offerNt = SalCalc.compareOffer({
+    current: { annualSalary: 50000000, incentive: 0 },
+    offer: { annualSalary: 60000000, incentive: 5000000 },
+    nonTaxable: { meal: 200000 }, dependents: 2, children: 1
+  });
+  check("이직 비교 · 비과세 공통 입력이 제안에 적용", 200000, offerNt.offer.input.nonTaxable.applied);
+  check("이직 비교 · 비과세 공통 입력이 현 직장에도 적용", 200000, offerNt.current.input.nonTaxable.applied);
 
   var failed = rows.filter(function (r) { return !r.pass; });
   window.__TEST_RESULTS = {
