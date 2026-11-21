@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>뷰포트 검증 · 딱셈</title>
+<style>
+  html,body{margin:0;background:#eef1f6;font:13px/1.5 -apple-system,"Malgun Gothic",system-ui,sans-serif}
+  #out{padding:10px 14px;background:#fff;border-bottom:1px solid #d8dfea;font-weight:600;white-space:pre-wrap}
+  #wrap{padding:10px;display:flex;gap:10px;align-items:flex-start}
+  iframe{border:1px solid #b9c3d4;background:#fff;display:block}
+</style>
+</head>
+<body>
+<div id="out">측정 중…</div>
+<div id="wrap"><iframe id="frame" style="width:390px;height:900px" title="검증 대상"></iframe></div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var w = Number(q.get("w") || 390);
+  var src = q.get("src") || "../";
+  var full = q.get("full") === "1";
+  var f = document.getElementById("frame");
+  f.style.width = w + "px";
+  f.src = src;
+
+  f.addEventListener("load", function () {
+    var d, win;
+    try { d = f.contentDocument; win = f.contentWindow; } catch (e) { document.getElementById("out").textContent = "접근 불가: " + e.message; return; }
+    var doc = d.documentElement;
+    var lines = [];
+    lines.push("요청 폭 " + w + "px · 실제 뷰포트 " + win.innerWidth + "px (" + src + ")");
+    lines.push("가로 넘침: " + (doc.scrollWidth > win.innerWidth + 1
+      ? "있음 — scrollWidth " + doc.scrollWidth + " > " + win.innerWidth
+      : "없음 — scrollWidth " + doc.scrollWidth));
+
+    var over = [];
+    Array.prototype.forEach.call(d.querySelectorAll("body *"), function (el) {
+      if (el.closest(".mini-bar")) return;
+      if (el.closest("details") && !el.closest("details[open]")) return;
+      var cs = win.getComputedStyle(el);
+      if (cs.position === "fixed" || cs.display === "none") return;
+      var r = el.getBoundingClientRect();
+      if (r.width > 0 && r.right > win.innerWidth + 1) {
+        over.push(el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") +
+          (el.className && typeof el.className === "string" ? "." + el.className.split(" ")[0] : "") +
+          " right=" + Math.round(r.right));
+      }
+    });
+    lines.push("뷰포트 밖으로 나간 요소 " + over.length + "개" + (over.length ? ": " + over.slice(0, 6).join(" | ") : ""));
+
+    var res = d.querySelector("#results");
+    lines.push("#results: " + (res ? res.textContent.replace(/\s+/g, " ").trim().slice(0, 80) : "없음"));
+    var badge = d.querySelector(".demo-badge");
+    lines.push("예시 배지: " + (badge ? badge.textContent.trim() : "없음"));
+    lines.push("문서 높이 " + doc.scrollHeight + "px");
+
+    document.getElementById("out").textContent = lines.join("\n");
+    if (full) f.style.height = doc.scrollHeight + "px";
+    window.__VIEWPORT_CHECK = lines;
+  });
+})();
+</script>
+</body>
+</html>
