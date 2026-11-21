@@ -27,16 +27,21 @@
 
 <header class="site-head">
   <div class="wrap head-inner">
-    <a class="brand" href="./">
-      <span class="brand-mark" aria-hidden="true">₩</span>
-      <span class="brand-text">연말정산 계산기</span>
-    </a>
-    <nav class="head-nav" aria-label="주요 메뉴">
+    <div class="head-left">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true">₩</span>
+        <span class="brand-text">계산기</span>
+      </a>
+      <nav class="calc-switch" aria-label="계산기 선택">
+        <a class="calc-tab is-active" href="./" aria-current="page">연말정산</a>
+        <a class="calc-tab" href="salary/">월급·이직 비교</a>
+      </nav>
+    </div>
+    <nav class="head-nav" aria-label="페이지 내 메뉴">
       <a href="#calc">계산하기</a>
       <a href="#changes">2026년 달라진 점</a>
       <a href="#principle">몰아주기 원리</a>
       <a href="#faq">자주 묻는 질문</a>
-      <a class="nav-cross" href="salary/">월급·이직 비교 ↗</a>
     </nav>
   </div>
 </header>
@@ -157,12 +162,24 @@
               <label class="field"><span class="field-label">문화체육 <em>(7천만 이하 30%)</em></span><span class="input-wrap"><input id="wCardCulture" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
             </div>
           </div>
+          <div class="sub-block dependent-card mode-single-only" id="dependentCardBlock" hidden>
+            <div class="sub-head">
+              <h3>배우자·부양가족 카드 사용액 <span class="tag-sum">합산 공제</span></h3>
+            </div>
+            <p class="card-help">배우자·부모님 등 기본공제 대상 가족 명의로 쓴 금액입니다. 본인 카드와 <strong>자동으로 합산</strong>해 총급여 25% 문턱과 한도를 계산합니다. 자녀 카드 사용분은 아래 <strong>자녀 명의 카드 사용액</strong> 안내를 따라 주세요.</p>
+            <div class="grid-3">
+              <label class="field"><span class="field-label">신용카드</span><span class="input-wrap"><input id="depCardCredit" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">체크·현금영수증</span><span class="input-wrap"><input id="depCardCheck" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+              <label class="field"><span class="field-label">전통시장·대중교통</span><span class="input-wrap"><input id="depCardTraditional" type="text" inputmode="numeric" value="0"><span class="unit">만원</span></span></label>
+            </div>
+            <p class="hint">가족 카드의 문화체육 사용분은 위 본인 <strong>문화체육</strong> 칸에 합쳐 입력해 주세요. 연금저축·IRP는 본인 명의 납입분만 공제됩니다.</p>
+          </div>
           <label class="field">
             <span class="field-label">자녀 명의 카드 사용액 <em>(체크·현금 30%로 계산)</em></span>
             <span class="input-wrap"><input id="childCard" type="text" inputmode="numeric" value="120"><span class="unit">만원</span></span>
           </label>
           <p class="hint">자녀 신용카드 사용분은 위 ‘신용카드’ 칸에 합산해 주세요. 자녀 사용액은 자녀를 기본공제로 올린 부모 쪽에 더해집니다.</p>
-          <p class="hint mode-single-only" id="cardSingleNote" hidden><strong>1인·외벌이 모드</strong>에서는 본인과 기본공제 대상 가족(배우자·자녀·부모님) 명의의 카드 사용액을 <strong>합산</strong>해 입력하세요. 가족 카드 사용액도 본인 공제에 포함됩니다.</p>
+          <p class="hint mode-single-only" id="cardSingleNote" hidden><strong>1인·외벌이 모드</strong>에서는 본인 카드와 기본공제 대상 가족 명의 카드 사용액을 합쳐 공제받습니다. 배우자·부모님 사용분은 위 <strong>배우자·부양가족 카드 사용액</strong> 칸에 따로 넣어 주세요.</p>
         </fieldset>
 
         <!-- 연금·보험 -->
@@ -391,6 +408,14 @@
           올라갑니다(총급여 7,000만원 이하). 7,000만원을 넘으면 275만원·300만원입니다. 여기서 자녀는
           20세 이하이면서 소득요건을 충족하고, 다른 사람의 기본공제를 받지 않은 자녀입니다. 맞벌이라면
           자녀를 기본공제로 올린 쪽의 한도만 늘어납니다.</p>
+      </details>
+      <details>
+        <summary>외벌이인데 배우자·부모님 카드 사용액도 공제되나요?</summary>
+        <p>네. 배우자·부모님·자녀처럼 기본공제 대상인 가족은 소득 요건을 충족하면 그 카드 사용액을
+          본인 카드와 합쳐 신용카드 등 소득공제를 받을 수 있습니다. ‘1인 · 외벌이’ 모드에서
+          <strong>배우자·부양가족 카드 사용액</strong>에 입력하면 총급여 25% 문턱과 한도를 본인 사용분과
+          합산해 계산합니다. 반면 연금저축·IRP는 본인 명의 납입분만 공제되고, 맞벌이는 각자 명의
+          사용분만 인정됩니다.</p>
       </details>
       <details>
         <summary>맞벌이도 월세 세액공제를 각자 받을 수 있나요?</summary>

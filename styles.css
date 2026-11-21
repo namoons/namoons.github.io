@@ -62,17 +62,46 @@ body {
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 30;
 }
-.head-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 700; }
+.head-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 60px;
+}
+.head-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.brand {
+  display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink);
+  font-weight: 700; white-space: nowrap;
+}
 .brand-mark {
   width: 30px; height: 30px; border-radius: 9px; background: var(--brand); color: #fff;
-  display: grid; place-items: center; font-size: 17px; font-weight: 800;
+  display: grid; place-items: center; font-size: 17px; font-weight: 800; flex: 0 0 auto;
 }
 .brand-text { font-size: 16px; letter-spacing: -.01em; }
-.head-nav { display: flex; gap: 18px; }
-.head-nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; }
+
+/* 두 계산기를 같은 레벨의 탭으로 */
+.calc-switch {
+  display: flex; gap: 3px; padding: 3px; background: #e9eef7; border-radius: 12px;
+  flex: 0 0 auto;
+}
+.calc-tab {
+  display: flex; align-items: center; padding: 7px 13px; border-radius: 9px;
+  font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; color: #55637a;
+  text-decoration: none; white-space: nowrap; transition: color .15s, background .15s;
+}
+.calc-tab:hover { color: var(--brand); background: rgba(255, 255, 255, .6); }
+.calc-tab.is-active { background: #fff; color: var(--brand); box-shadow: 0 1px 3px rgba(16, 24, 40, .14); }
+
+.head-nav { display: flex; gap: 16px; }
+.head-nav a { color: var(--muted); text-decoration: none; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
 .head-nav a:hover { color: var(--brand); }
-@media (max-width: 760px) { .head-nav { display: none; } }
+.head-nav a[aria-current="page"] { color: var(--ink); }
+@media (max-width: 900px) { .head-nav { display: none; } }
+@media (max-width: 560px) {
+  .head-inner { height: 56px; gap: 8px; }
+  .head-left { gap: 8px; }
+  .brand-mark { width: 26px; height: 26px; border-radius: 8px; font-size: 15px; }
+  .brand-text { font-size: 14px; }
+  .calc-tab { padding: 6px 10px; font-size: 12.5px; }
+}
+@media (max-width: 380px) { .brand-text { display: none; } }
 
 /* ---------- hero ---------- */
 .hero { padding: 50px 20px 28px; }
@@ -137,6 +166,20 @@ body.single-mode .pair-grid { grid-template-columns: 1fr; }
 @media (max-width: 640px) {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
 }
+
+/* 1인·외벌이: 배우자·부양가족 카드 사용액(합산 공제) 구역 */
+.dependent-card {
+  margin-top: 16px; padding: 14px 15px 12px;
+  background: #f8fafd; border: 1px dashed var(--line-strong); border-radius: 14px;
+}
+.dependent-card .sub-head h3 { display: flex; align-items: center; gap: 7px; font-size: 13.5px; }
+.tag-sum {
+  font-size: 10.5px; font-weight: 700; color: var(--brand); background: var(--brand-weak);
+  border-radius: 999px; padding: 2px 8px; letter-spacing: 0;
+}
+.dependent-card .card-help { margin: 5px 0 12px; }
+.dependent-card .grid-3 { gap: 10px; }
+.dependent-card .hint { margin-top: 10px; }
 
 .person-col { display: flex; flex-direction: column; gap: 11px; min-width: 0; }
 .person-name {
@@ -383,18 +426,6 @@ ol.steps li::before {
   .table-wrap td::before {
     content: attr(data-label); display: block; margin-bottom: 2px;
     font-size: 11px; font-weight: 600; color: #8a94a6; letter-spacing: .01em;
-  }
-}
-
-/* ---------- cross-site navigation ---------- */
-.head-nav a.nav-cross { color: var(--brand); }
-@media (max-width: 760px) {
-  .head-nav { display: flex; gap: 6px; }
-  .head-nav a:not(.nav-cross) { display: none; }
-  .head-nav a.nav-cross {
-    font-size: 12px; font-weight: 700; color: var(--brand);
-    border: 1px solid var(--line-strong); border-radius: 999px;
-    padding: 5px 10px; background: #fff; white-space: nowrap;
   }
 }
 

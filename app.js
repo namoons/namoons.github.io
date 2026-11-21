@@ -132,6 +132,13 @@
         disabled: numOf("pDisabled")
       },
       childCard: manOf("childCard"),
+      dependentCard: {
+        credit: mode === "single" ? manOf("depCardCredit") : 0,
+        check: mode === "single" ? manOf("depCardCheck") : 0,
+        /* 전통시장·대중교통은 공제율(40%)과 추가공제 한도가 같아 한 칸으로 받습니다 */
+        traditional: mode === "single" ? manOf("depCardTraditional") : 0,
+        transit: 0
+      },
       medical: { general: manOf("medGeneral"), unlimited: manOf("medUnlimited") },
       education: { school: manOf("eduSchool"), college: manOf("eduCollege") },
       donation: manOf("donation"),
@@ -263,9 +270,12 @@
       (p.personal.senior ? " + 경로우대" : "") + (p.personal.disabled ? " + 장애인" : "")]);
     if (p.pensionDeduction) rows.push(["국민연금 보험료", "-" + won(p.pensionDeduction), ""]);
     if (p.healthDeduction) rows.push(["건강·장기요양·고용보험료", "-" + won(p.healthDeduction), ""]);
-    if (p.cardDeductionApplied) {
-      rows.push(["신용카드 등 소득공제", "-" + won(p.cardDeductionApplied),
-        "25% 문턱 " + manwon(p.card.threshold) + " · 기본한도 " + manwon(p.card.baseLimit)]);
+    if (p.cardDeductionApplied || p.cardFamily) {
+      var cardSub = "25% 문턱 " + manwon(p.card.threshold) + " · 기본한도 " + manwon(p.card.baseLimit);
+      if (p.cardFamily) {
+        cardSub = "배우자·부양가족 " + manwon(p.cardFamily) + " 합산 · " + cardSub;
+      }
+      rows.push(["신용카드 등 소득공제", "-" + won(p.cardDeductionApplied), cardSub]);
     }
     rows.push(["과세표준", won(p.taxableBase), "한계세율 " + pct(p.marginalRate)]);
     rows.push(["산출세액", won(p.calculatedTax), ""]);
@@ -357,6 +367,8 @@
     var items = [];
     items.push("근로소득공제 " + manwon(p.earnedDeduction) + " 자동 적용");
     items.push("인적공제 " + manwon(p.personal.total) + " (기본공제 " + p.personal.basicCount + "명)");
+    if (p.cardFamily) items.push("배우자·부양가족 카드 사용액 " + manwon(p.cardFamily) + "을 본인 카드와 합산 (합계 " +
+      manwon(p.card.total) + ", 문턱 " + manwon(p.card.threshold) + ")");
     if (p.card.deduction) items.push("신용카드 등 소득공제 " + manwon(p.cardDeductionApplied));
     if (p.credits.child) items.push("자녀세액공제 " + manwon(p.credits.child));
     if (p.credits.pension) items.push("연금계좌 세액공제 " + manwon(p.credits.pension));
@@ -440,6 +452,7 @@
 
   function applyDemo() {
     Object.keys(DEMO).forEach(function (id) { $(id).value = DEMO[id]; });
+    ["depCardCredit", "depCardCheck", "depCardTraditional"].forEach(function (id) { $(id).value = "0"; });
     $("autoInsurance").checked = true;
     $("spouseDependent").checked = false;
     $("singleParent").checked = false;
@@ -453,7 +466,8 @@
   function clearAll() {
     ["hGross", "hPrepaid", "wGross", "wPrepaid", "hCardCredit", "hCardCheck", "hCardTraditional",
       "hCardTransit", "hCardCulture", "wCardCredit", "wCardCheck", "wCardTraditional", "wCardTransit",
-      "wCardCulture", "childCard", "hPension", "hInsurance", "wPension", "wInsurance",
+      "wCardCulture", "childCard", "depCardCredit", "depCardCheck", "depCardTraditional",
+      "hPension", "hInsurance", "wPension", "wInsurance",
       "medUnlimited", "medGeneral", "eduSchool", "eduCollege", "donation", "rent",
       "pCount", "pSenior", "pDisabled"].forEach(function (id) { $(id).value = "0"; });
     $("children").innerHTML = "";

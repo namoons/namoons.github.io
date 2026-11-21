@@ -253,6 +253,7 @@
     remaining -= healthDeduction;
 
     /* 4. 신용카드 등 소득공제 (종합한도 2,500만원) */
+    var cardFamily = num(p.cardFamily);
     var card = cardDeduction({
       gross: gross,
       credit: p.card && p.card.credit,
@@ -358,6 +359,7 @@
       healthDeduction: best.healthDeduction,
       healthBreakdown: hi,
       card: card,
+      cardFamily: cardFamily,
       cardDeductionApplied: cardDeductionApplied,
       taxableBase: best.taxableBase,
       calculatedTax: best.calculatedTax,
@@ -462,6 +464,14 @@
         disabled: num(h.parents && h.parents.disabled)
       },
       childCard: num(h.childCard),
+      /* 1인 · 외벌이: 배우자·부양가족 명의 카드 사용액(본인 사용분에 합산) */
+      dependentCard: {
+        credit: num(h.dependentCard && h.dependentCard.credit),
+        check: num(h.dependentCard && h.dependentCard.check),
+        traditional: num(h.dependentCard && h.dependentCard.traditional),
+        transit: num(h.dependentCard && h.dependentCard.transit),
+        culture: 0
+      },
       medical: {
         general: num(h.medical && h.medical.general),
         unlimited: num(h.medical && h.medical.unlimited)
@@ -503,6 +513,11 @@
     var eduSchoolShare = schoolAll > 0 ? h.education.school * (mySchool / schoolAll) : 0;
     var eduCollegeShare = collegeAll > 0 ? h.education.college * (myCollege / collegeAll) : 0;
     var childCardShare = totalChildren > 0 ? h.childCard * (myChildren.length / totalChildren) : 0;
+    /* 1인 · 외벌이에서만: 배우자·부양가족 카드 사용액을 본인 사용분에 합산
+       (맞벌이는 각자 명의 사용분만 공제되므로 합산하지 않습니다) */
+    var familyCard = which === 0 && h.mode === "single"
+      ? h.dependentCard
+      : { credit: 0, check: 0, traditional: 0, transit: 0, culture: 0 };
 
     return {
       gross: person.gross,
@@ -510,12 +525,14 @@
       pensionPaid: person.pension,
       insurancePaid: person.insurance,
       card: {
-        credit: person.card.credit,
-        check: person.card.check + childCardShare,
-        traditional: person.card.traditional,
-        transit: person.card.transit,
-        culture: person.card.culture
+        credit: person.card.credit + familyCard.credit,
+        check: person.card.check + childCardShare + familyCard.check,
+        traditional: person.card.traditional + familyCard.traditional,
+        transit: person.card.transit + familyCard.transit,
+        culture: person.card.culture + familyCard.culture
       },
+      cardFamily: familyCard.credit + familyCard.check +
+        familyCard.traditional + familyCard.transit + familyCard.culture,
       cardChildCount: myChildren.filter(isCardChild).length,
       children: myChildren.filter(isBasicChild),
       childCreditCount: myChildren.filter(isChildCreditChild).length,

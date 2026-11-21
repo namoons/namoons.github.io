@@ -83,9 +83,14 @@ def main():
         page.wait_for_timeout(300)
         ov = overflow(page)
         ok("메인 데스크톱 가로 넘침 없음", ov["sw"] <= ov["iw"] + 1 and not ov["over"], str(ov))
-        nav = page.evaluate("""() => Array.from(document.querySelectorAll('.head-nav a'))
-            .map(a => ({text: a.textContent.trim(), href: a.getAttribute('href'), visible: a.offsetParent !== null}))""")
-        ok("메인 상단에 월급 계산기 링크", any("월급" in n["text"] and n["visible"] for n in nav), str(nav))
+        nav = page.evaluate("""() => Array.from(document.querySelectorAll('.calc-switch .calc-tab'))
+            .map(a => ({text: a.textContent.trim(), href: a.getAttribute('href'),
+                        active: a.classList.contains('is-active'), current: a.getAttribute('aria-current'),
+                        visible: a.offsetParent !== null}))""")
+        ok("메인 상단 계산기 탭 2개 노출", len(nav) == 2 and all(n["visible"] for n in nav), str(nav))
+        ok("메인 상단 탭 이름·순서", [n["text"] for n in nav] == ["연말정산", "월급·이직 비교"], str(nav))
+        ok("메인 연말정산 탭 활성", bool(nav) and nav[0]["active"] and nav[0]["current"] == "page"
+           and not nav[1]["active"], str(nav))
         foot = page.inner_text(".site-foot")
         ok("메인 푸터 한 줄 개인정보 안내", "브라우저 안에서만" in foot and "개인정보처리방침" in foot, foot[:160])
         ok("메인에 긴 개인정보·쿠키 섹션 없음", "개인정보와 쿠키" not in page.inner_text("body"))
@@ -110,6 +115,12 @@ def main():
         ok("2026·2027 비교표 렌더", all(k in table for k in ("2026년", "2027년", "국민연금", "장기요양", "월 실수령액")))
         ov = overflow(page)
         ok("월급 데스크톱 가로 넘침 없음", ov["sw"] <= ov["iw"] + 1 and not ov["over"], str(ov))
+        stabs = page.evaluate("""() => Array.from(document.querySelectorAll('.calc-switch .calc-tab'))
+            .map(a => ({text: a.textContent.trim(), href: a.getAttribute('href'),
+                        active: a.classList.contains('is-active'), current: a.getAttribute('aria-current')}))""")
+        ok("월급 탭 활성", len(stabs) == 2 and stabs[1]["active"] and stabs[1]["current"] == "page"
+           and not stabs[0]["active"], str(stabs))
+        ok("월급 → 연말정산 탭 링크", bool(stabs) and stabs[0]["href"] == "../", str(stabs))
         page.screenshot(path=str(SHOTS / "salary-desktop.png"), full_page=True)
 
         # 입력 변경 → 결과 재계산
@@ -144,9 +155,14 @@ def main():
             page.wait_for_timeout(350)
             ov = overflow(page)
             ok(f"{name} 모바일 가로 넘침 없음", ov["sw"] <= ov["iw"] + 1 and not ov["over"], str(ov))
-            visible_nav = page.evaluate("""() => Array.from(document.querySelectorAll('.head-nav a'))
-                .filter(a => a.offsetParent !== null).map(a => a.textContent.trim())""")
-            ok(f"{name} 모바일 상단 메뉴 1개만 노출", len(visible_nav) == 1, str(visible_nav))
+            visible_nav = page.evaluate("""() => Array.from(document.querySelectorAll('.calc-switch .calc-tab'))
+                .filter(a => a.offsetParent !== null).map(a => ({text: a.textContent.trim(),
+                  h: Math.round(a.getBoundingClientRect().height),
+                  top: Math.round(a.getBoundingClientRect().top)}))""")
+            ok(f"{name} 모바일 계산기 탭 2개 노출", len(visible_nav) == 2, str(visible_nav))
+            ok(f"{name} 모바일 두 탭 같은 줄·같은 높이",
+               len(visible_nav) == 2 and len({t["h"] for t in visible_nav}) == 1
+               and len({t["top"] for t in visible_nav}) == 1, str(visible_nav))
             if name == "월급":
                 ok("월급 모바일 미니바 표시", page.is_visible("#miniBar"))
                 page.screenshot(path=str(SHOTS / "salary-mobile.png"), full_page=True)
