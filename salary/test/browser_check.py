@@ -229,7 +229,7 @@ def main():
     # ---------- 6. 정적 검사 ----------
     for rel in ["index.html", "salary/index.html", "privacy/index.html"]:
         html = (SITE / rel).read_text(encoding="utf-8")
-        ok(f"{rel} canonical", "namoons.github.io" in html and 'rel="canonical"' in html)
+        ok(f"{rel} canonical", "ddaksem.kr" in html and 'rel="canonical"' in html)
         ld = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
         for i, block in enumerate(ld):
             try:
@@ -239,8 +239,8 @@ def main():
         ok(f"{rel} JSON-LD 파싱", all(True for _ in ld))
 
     sm = (SITE / "sitemap.xml").read_text(encoding="utf-8")
-    ok("sitemap에 /salary/", "https://namoons.github.io/salary/" in sm)
-    ok("sitemap에 /privacy/", "https://namoons.github.io/privacy/" in sm)
+    ok("sitemap에 /salary/", "https://ddaksem.kr/salary/" in sm)
+    ok("sitemap에 /privacy/", "https://ddaksem.kr/privacy/" in sm)
 
     passed = sum(1 for _, c, _ in checks if c)
     print(f"\n{passed}/{len(checks)} checks passed")
