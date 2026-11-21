@@ -119,7 +119,7 @@ body {
 /* ---------- hero ---------- */
 .hero { padding: 50px 20px 28px; }
 @media (max-width: 640px) { .hero { padding: 28px 20px 20px; } }
-#results { scroll-margin-top: 80px; }
+section[id], #results { scroll-margin-top: 80px; }
 .eyebrow {
   display: inline-block; margin: 0 0 10px; font-size: 13px; font-weight: 700;
   color: var(--brand); background: var(--brand-weak); padding: 5px 11px; border-radius: 999px;
