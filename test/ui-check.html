@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>UI 자체 점검 · 딱셈</title>
+<style>
+  html,body{margin:0;background:#f5f7fb;font:13px/1.5 -apple-system,"Malgun Gothic",system-ui,sans-serif}
+  #out{padding:12px 16px;background:#fff;border-bottom:1px solid #dfe5ee}
+  #out h1{font-size:15px;margin:0 0 6px}
+  #out .ok{color:#0b7a53;font-weight:700}
+  #out .fail{color:#b42318;font-weight:700}
+  #out ul{margin:8px 0 0;padding-left:18px}
+  #out li{font-size:12px}
+  #wrap{padding:10px}
+  iframe{border:1px solid #b9c3d4;background:#fff;display:block}
+</style>
+</head>
+<body>
+<div id="out"><h1>UI 점검 실행 중…</h1></div>
+<div id="wrap"><iframe id="frame" title="점검 대상"></iframe></div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var src = q.get("src") || "../";
+  var width = Number(q.get("w") || 390);
+  var which = q.get("page") || "yearend";
+  var frame = document.getElementById("frame");
+  frame.style.width = width + "px";
+  frame.style.height = "900px";
+
+  var results = [];
+  function ok(name, cond, extra) { results.push({ name: name, ok: !!cond, extra: extra === undefined ? "" : extra }); }
+  function text(d) { return (d.body.innerText || "").replace(/\s+/g, " "); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function fire(win, el, type) { el.dispatchEvent(new win.Event(type, { bubbles: true })); }
+  function setVal(win, d, id, v) {
+    var el = d.getElementById(id);
+    el.value = v;
+    fire(win, el, "input");
+    fire(win, el, "change");
+  }
+  function click(win, d, el) { el.click(); }
+  function byText(d, sel, t) {
+    return Array.prototype.filter.call(d.querySelectorAll(sel), function (el) {
+      return (el.textContent || "").indexOf(t) >= 0;
+    });
+  }
+  function has(d, t) { return text(d).indexOf(t) >= 0; }
+  function overflow(win, d) {
+    var bad = [];
+    if (d.documentElement.scrollWidth > win.innerWidth + 1) bad.push("scrollWidth " + d.documentElement.scrollWidth);
+    Array.prototype.forEach.call(d.querySelectorAll("body *"), function (el) {
+      if (el.closest(".mini-bar")) return;
+      var cs = win.getComputedStyle(el);
+      if (cs.position === "fixed" || cs.display === "none") return;
+      var r = el.getBoundingClientRect();
+      if (r.width > 0 && r.right > win.innerWidth + 1) {
+        bad.push(el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + " right=" + Math.round(r.right));
+      }
+    });
+    return bad;
+  }
+
+  async function yearEnd(win, d) {
+    ok("첫 진입 예시 배지", !!d.querySelector(".demo-badge"), d.querySelector(".demo-badge") && d.querySelector(".demo-badge").textContent);
+    ok("첫 진입 환급액 +1,165,505원", has(d, "+1,165,505원"));
+    ok("결과 카드 주택자금 칩", has(d, "주택자금 공제"));
+    ok("결과 카드 도구(내 값 입력하기)", !!byText(d, ".result-tools .btn-tool", "내 값 입력하기").length);
+
+    click(win, d, byText(d, ".result-tools .btn-tool", "내 값 입력하기")[0]);
+    await sleep(220);
+    ok("빈 상태 안내", has(d, "총급여를 입력하면 예상 환급액이 나타납니다"));
+    ok("빈 상태에서 근로소득공제 0만원 문장 없음", !has(d, "근로소득공제 0만원"));
+    ok("빈 상태에서 예시 배지 사라짐", !d.querySelector(".demo-badge"));
+    ok("도구가 모두 지우기/예시 불러오기로 전환",
+      !!byText(d, ".result-tools .btn-tool", "모두 지우기").length && !!byText(d, ".result-tools .btn-tool", "예시 불러오기").length);
+
+    setVal(win, d, "hGross", "5000");
+    await sleep(220);
+    ok("총급여 5,000만 입력 시 계산", has(d, "2,788,701"), text(d).slice(0, 60));
+    ok("렌더 오류 카드 없음", !has(d, "입력값을 확인해 주세요"));
+
+    setVal(win, d, "hCardCredit", "1800000");
+    await sleep(220);
+    var warn = d.querySelector(".field-warn:not([hidden])");
+    ok("만원 단위 경고 표시", !!warn && warn.textContent.indexOf("180억원") >= 0, warn && warn.textContent);
+    var conv = d.querySelector("[data-convert]");
+    ok("원→만원 환산 버튼", !!conv, conv && conv.textContent);
+    if (conv) {
+      conv.dispatchEvent(new win.MouseEvent("mousedown", { bubbles: true }));
+      await sleep(240);
+      ok("환산 실행 결과 180만원", d.getElementById("hCardCredit").value === "180", d.getElementById("hCardCredit").value);
+      ok("환산 후 경고 사라짐", !d.querySelector(".field-warn:not([hidden])"));
+    }
+
+    /* 자녀 장애 추가공제 */
+    click(win, d, d.getElementById("addChild"));
+    await sleep(200);
+    var birth = d.querySelector("#children .child-row:last-child .child-birth");
+    birth.value = "2016"; fire(win, birth, "input");
+    var dis = d.querySelector("#children .child-row:last-child .child-handicap");
+    dis.checked = true; fire(win, dis, "change");
+    await sleep(240);
+    ok("자녀 장애 체크 → 장애인 추가공제 200만원", has(d, "장애인 추가공제 200만원"));
+
+    /* 월세 요건 */
+    setVal(win, d, "rent", "800");
+    await sleep(240);
+    ok("월세 요건 미체크 시 공제 제외 안내", has(d, "무주택 세대주 요건") && has(d, "제외했습니다"));
+    var req = d.getElementById("rentEligible");
+    req.checked = true; fire(win, req, "change");
+    await sleep(240);
+    ok("월세 요건 체크 시 월세 공제 반영", has(d, "월세 800만원 →"));
+
+    /* 연금저축 한도 */
+    setVal(win, d, "hPensionSaving", "900");
+    await sleep(240);
+    ok("연금저축 900만원 → 600만 한도 안내", has(d, "한도(연금저축 600만·합산 900만원)를 넘어"), text(d).slice(0, 80));
+    setVal(win, d, "hPensionSaving", "600");
+    setVal(win, d, "hIrp", "300");
+    await sleep(260);
+    ok("연금저축 600 + IRP 300 = 합산 900만원이면 한도 초과 없음", !has(d, "넘어 공제되지 않았습니다"));
+
+    /* 예시 → 모드 전환 */
+    click(win, d, byText(d, ".result-tools .btn-tool", "예시 불러오기")[0] || byText(d, "#formArea button", "예시 불러오기")[0]);
+    await sleep(260);
+    ok("예시 불러오기 후 배지", !!d.querySelector(".demo-badge"));
+    click(win, d, d.getElementById("tabSingle"));
+    await sleep(260);
+    ok("1인 모드 예시: 자녀 0명", d.querySelectorAll("#children .child-row").length === 0,
+      d.querySelectorAll("#children .child-row").length);
+    ok("1인 모드 예시: 카드 1,200만원", d.getElementById("hCardCredit").value.replace(/,/g, "") === "1200", d.getElementById("hCardCredit").value);
+    ok("1인 모드 예시: 아내 자리 숨김", d.getElementById("wifeCol").hidden === true);
+    ok("1인 모드에서도 예시 배지", !!d.querySelector(".demo-badge"));
+    click(win, d, d.getElementById("tabCouple"));
+    await sleep(260);
+    ok("맞벌이 복귀 시 예시 자녀 2명", d.querySelectorAll("#children .child-row").length === 2,
+      d.querySelectorAll("#children .child-row").length);
+
+    var over = overflow(win, d);
+    ok("가로 넘침 없음", over.length === 0, over.slice(0, 4).join(" | "));
+    ok("콘솔 오류 없음(수집분)", !(win.__uiErrors && win.__uiErrors.length), win.__uiErrors && win.__uiErrors.join(" | "));
+  }
+
+  async function salary(win, d) {
+    ok("첫 진입 예시 배지", !!d.querySelector(".demo-badge"), d.querySelector(".demo-badge") && d.querySelector(".demo-badge").textContent);
+    ok("첫 진입 2027 월 실수령 3,608,707원", has(d, "3,608,707원"));
+    ok("도구(내 조건 입력하기)", !!byText(d, ".result-tools .btn-tool", "내 조건 입력하기").length);
+
+    click(win, d, byText(d, ".result-tools .btn-tool", "내 조건 입력하기")[0]);
+    await sleep(220);
+    ok("빈 상태 안내", has(d, "연봉을 입력하면 결과가 나타납니다"));
+    ok("빈 상태에서 예시 배지 사라짐", !d.querySelector(".demo-badge"));
+
+    setVal(win, d, "salaryInput", "3000");
+    await sleep(260);
+    ok("연봉 3,000만 계산", has(d, "2,270,122원"), text(d).slice(0, 60));
+
+    var details = d.querySelectorAll("#results details");
+    var order = "";
+    if (details.length) {
+      details[0].open = true;
+      var labels = Array.prototype.map.call(details[0].querySelectorAll(".bk-label"), function (el) {
+        return el.textContent.replace(/\s+/g, " ").trim();
+      });
+      var iCalc = -1, iStd = -1, iBase = -1;
+      labels.forEach(function (l, i) {
+        if (l.indexOf("산출세액") === 0) iCalc = i;
+        if (l.indexOf("표준세액공제") === 0) iStd = i;
+        if (l.indexOf("과세표준") === 0) iBase = i;
+      });
+      order = "산출세액 " + iCalc + " / 표준세액공제 " + iStd + " / 과세표준 " + iBase;
+      ok("표준세액공제 행이 산출세액 아래", iStd > iCalc && iCalc > iBase && iStd > -1, order);
+      var stdRow = Array.prototype.filter.call(details[0].querySelectorAll(".bk-row"), function (r) {
+        return r.textContent.indexOf("표준세액공제") >= 0;
+      })[0];
+      ok("표준세액공제 행에 '세액공제' 표기", !!stdRow && stdRow.textContent.indexOf("세액공제") >= 0, stdRow && stdRow.textContent.slice(0, 40));
+    }
+    details = null;
+
+    /* 퇴직금 포함 */
+    var sev = d.getElementById("sevIncludedA");
+    sev.checked = true; fire(win, sev, "change");
+    await sleep(250);
+    ok("퇴직금 포함 → 월 급여 연봉÷13", has(d, "연봉÷13"), d.querySelector(".result-sub").textContent);
+    ok("퇴직금 포함 시 세전 월 2,307,692원(3,000만÷13)", has(d, "2,307,692원"), d.querySelector(".result-sub").textContent);
+
+    /* 비과세 과세 전환 */
+    setVal(win, d, "ntMealA", "200000");
+    setVal(win, d, "ntChildA", "300000");
+    setVal(win, d, "preschoolA", "0");
+    await sleep(260);
+    ok("비과세 한도 초과분 과세 전환 표시", has(d, "과세로 전환 300,000원"), d.getElementById("ntSummaryA").textContent);
+
+    /* 이직 비교: 예시를 다시 불러온 뒤 이직 탭으로 */
+    click(win, d, byText(d, ".result-tools .btn-tool", "예시 불러오기")[0] || byText(d, ".form-buttons button", "예시 불러오기")[0]);
+    await sleep(260);
+    click(win, d, d.getElementById("tabOffer"));
+    await sleep(280);
+    ok("이직 첫 진입에도 예시 배지", !!d.querySelector(".demo-badge"));
+    ok("이직 세후 차액 +949,743원", has(d, "+949,743원"));
+    ok("이직 제안 카드가 is-best", !!d.querySelector(".offer-card.is-best") &&
+      d.querySelector(".offer-card.is-best").textContent.indexOf("이직 제안") >= 0);
+    ok("총보상 행 표시", has(d, "총보상"), text(d).slice(0, 50));
+    setVal(win, d, "offSalary", "4000");
+    setVal(win, d, "offIncentive", "0");
+    await sleep(280);
+    var best = d.querySelector(".offer-card.is-best");
+    ok("제안이 낮으면 현 직장이 is-best", !!best && best.textContent.indexOf("현 직장") >= 0, best && best.textContent.slice(0, 30));
+
+    var tips = byText(d, "#tips li", "역산");
+    ok("이직 팁에 '역산' 약속 없음", tips.length === 0 || tips[0].textContent.indexOf("연봉을 조금씩 바꿔") >= 0,
+      tips.length ? tips[0].textContent.slice(0, 40) : "");
+
+    var over = overflow(win, d);
+    ok("가로 넘침 없음", over.length === 0, over.slice(0, 4).join(" | "));
+    ok("콘솔 오류 없음(수집분)", !(win.__uiErrors && win.__uiErrors.length), win.__uiErrors && win.__uiErrors.join(" | "));
+  }
+
+  frame.addEventListener("load", async function () {
+    var d, win;
+    try { d = frame.contentDocument; win = frame.contentWindow; } catch (e) {
+      document.getElementById("out").textContent = "접근 불가: " + e.message; return;
+    }
+    win.__uiErrors = [];
+    win.addEventListener("error", function (e) { win.__uiErrors.push(e.message); });
+    await sleep(300);
+    try {
+      if (which === "salary") await salary(win, d);
+      else await yearEnd(win, d);
+    } catch (e) {
+      results.push({ name: "예외", ok: false, extra: String(e && e.stack || e) });
+    }
+    frame.style.height = Math.max(600, d.documentElement.scrollHeight) + "px";
+    var passed = results.filter(function (r) { return r.ok; }).length;
+    var failed = results.length - passed;
+    var html = '<h1 class="' + (failed ? "fail" : "ok") + '">' + passed + " / " + results.length + " 통과" +
+      (failed ? " · 실패 " + failed : " · 전부 통과") + " (폭 " + width + "px)</h1><ul>";
+    results.forEach(function (r) {
+      html += "<li>" + (r.ok ? "✅" : "❌") + " " + r.name + (r.extra ? ' <code style="color:#5d6b7f">— ' + String(r.extra).slice(0, 120) + "</code>" : "") + "</li>";
+    });
+    html += "</ul>";
+    document.getElementById("out").innerHTML = html;
+    window.__UI_RESULTS = { page: which, width: width, passed: passed, failed: failed, rows: results };
+  });
+
+  frame.src = src + (src.indexOf("?") >= 0 ? "&" : "?") + "_ui=1";
+})();
+</script>
+</body>
+</html>
