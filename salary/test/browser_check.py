@@ -96,7 +96,7 @@ def main():
         ok("메인에 긴 개인정보·쿠키 섹션 없음", "개인정보와 쿠키" not in page.inner_text("body"))
         ok("메인 푸터 오류 제보 링크",
            page.evaluate("""() => Array.from(document.querySelectorAll('.site-foot a'))
-             .some(a => a.href.includes('github.com/namoons/namoons.github.io/issues/new'))"""))
+             .some(a => a.href.includes('docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform'))"""))
         page.screenshot(path=str(SHOTS / "index-desktop.png"), full_page=True)
         check_links(page, "메인")
         page.close()
