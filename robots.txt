@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /salary/test/
 
-Sitemap: https://ddaksem.kr/sitemap.xml
+Sitemap: https://myeongse.kr/sitemap.xml

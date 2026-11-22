@@ -189,7 +189,7 @@ def main():
         check_links(page, "개인정보")
         page.close()
 
-        # ---------- 6. 브랜드(딱셈)·파비콘·예시 값 ----------
+        # ---------- 6. 브랜드(명세)·파비콘·예시 값 ----------
         for key, rel in [("메인", "index.html"), ("월급", "salary/index.html"), ("개인정보", "privacy/index.html")]:
             page = browser.new_page(viewport={"width": 1280, "height": 900})
             watch(page, f"brand-{key}")
@@ -199,10 +199,14 @@ def main():
             title = page.title()
             site = page.get_attribute('meta[property="og:site_name"]', "content")
             icon = page.evaluate("() => document.querySelector('link[rel=icon]').href")
-            ok(f"{key} 브랜드 딱셈", brand == "딱셈" and "딱셈" in page.inner_text(".site-foot"), brand)
-            ok(f"{key} 제목·og:site_name", "딱셈" in title and site == "딱셈", f"{title} / {site}")
-            ok(f"{key} 파비콘 체크 마크", ("%231d4ed8" in icon or "#1d4ed8" in icon) and "path" in icon, icon[:70])
-            ok(f"{key} 로고 SVG 마크", page.evaluate("() => !!document.querySelector('.brand-mark svg path')"))
+            ok(f"{key} 브랜드 명세", brand == "명세" and "명세" in page.inner_text(".site-foot"), brand)
+            ok(f"{key} 제목·og:site_name", "명세" in title and site == "명세", f"{title} / {site}")
+            ok(f"{key} 파비콘 명세 문서 마크", ("%231d4ed8" in icon or "#1d4ed8" in icon)
+               and "rect" in icon and "path" in icon, icon[:90])
+            ok(f"{key} 로고 SVG 마크", page.evaluate("""() => {
+                const svg = document.querySelector('.brand-mark svg');
+                return !!svg && svg.querySelectorAll('rect').length >= 2 && svg.querySelectorAll('path').length === 3;
+            }"""))
             page.close()
 
         page = browser.new_page(viewport={"width": 1280, "height": 900})
@@ -229,7 +233,7 @@ def main():
     # ---------- 6. 정적 검사 ----------
     for rel in ["index.html", "salary/index.html", "privacy/index.html"]:
         html = (SITE / rel).read_text(encoding="utf-8")
-        ok(f"{rel} canonical", "ddaksem.kr" in html and 'rel="canonical"' in html)
+        ok(f"{rel} canonical", "myeongse.kr" in html and 'rel="canonical"' in html)
         ld = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
         for i, block in enumerate(ld):
             try:
@@ -239,8 +243,8 @@ def main():
         ok(f"{rel} JSON-LD 파싱", all(True for _ in ld))
 
     sm = (SITE / "sitemap.xml").read_text(encoding="utf-8")
-    ok("sitemap에 /salary/", "https://ddaksem.kr/salary/" in sm)
-    ok("sitemap에 /privacy/", "https://ddaksem.kr/privacy/" in sm)
+    ok("sitemap에 /salary/", "https://myeongse.kr/salary/" in sm)
+    ok("sitemap에 /privacy/", "https://myeongse.kr/privacy/" in sm)
 
     passed = sum(1 for _, c, _ in checks if c)
     print(f"\n{passed}/{len(checks)} checks passed")
