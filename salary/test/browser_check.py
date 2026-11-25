@@ -36,6 +36,8 @@ def overflow(page):
         over: Array.from(document.querySelectorAll('body *'))
           .filter(el => {
             const r = el.getBoundingClientRect();
+            /* 가로 스크롤 목차(.mobile-toc) 안쪽 링크는 화면 밖으로 이어지는 것이 정상이다. */
+            if (el.closest('.mobile-toc')) return false;
             return r.width > 0 && r.right > window.innerWidth + 1.5;
           })
           .slice(0, 5)
@@ -87,8 +89,9 @@ def main():
             .map(a => ({text: a.textContent.trim(), href: a.getAttribute('href'),
                         active: a.classList.contains('is-active'), current: a.getAttribute('aria-current'),
                         visible: a.offsetParent !== null}))""")
-        ok("메인 상단 계산기 탭 2개 노출", len(nav) == 2 and all(n["visible"] for n in nav), str(nav))
-        ok("메인 상단 탭 이름·순서", [n["text"] for n in nav] == ["연말정산", "월급·이직 비교"], str(nav))
+        ok("메인 상단 계산기 탭 3개 노출", len(nav) == 3 and all(n["visible"] for n in nav), str(nav))
+        ok("메인 상단 탭 이름·순서",
+           [n["text"] for n in nav] == ["연말정산", "월급·이직 비교월급", "건보료·피부양자건보료"], str(nav))
         ok("메인 연말정산 탭 활성", bool(nav) and nav[0]["active"] and nav[0]["current"] == "page"
            and not nav[1]["active"], str(nav))
         foot = page.inner_text(".site-foot")
@@ -118,8 +121,8 @@ def main():
         stabs = page.evaluate("""() => Array.from(document.querySelectorAll('.calc-switch .calc-tab'))
             .map(a => ({text: a.textContent.trim(), href: a.getAttribute('href'),
                         active: a.classList.contains('is-active'), current: a.getAttribute('aria-current')}))""")
-        ok("월급 탭 활성", len(stabs) == 2 and stabs[1]["active"] and stabs[1]["current"] == "page"
-           and not stabs[0]["active"], str(stabs))
+        ok("월급 탭 활성", len(stabs) == 3 and stabs[1]["active"] and stabs[1]["current"] == "page"
+           and not stabs[0]["active"] and not stabs[2]["active"], str(stabs))
         ok("월급 → 연말정산 탭 링크", bool(stabs) and stabs[0]["href"] == "../", str(stabs))
         page.screenshot(path=str(SHOTS / "salary-desktop.png"), full_page=True)
 
@@ -129,9 +132,11 @@ def main():
         big2 = page.inner_text("#results .result-big")
         ok("연봉 변경 시 결과 갱신", big2.strip() != big.strip(), f"{big} → {big2}")
 
-        # 이직 모드
+        # 이직 모드 — 예시 조건 그대로 확인(연봉을 고친 뒤에는 입력 전 상태가 되므로 새로 연다)
+        page.goto((SITE / "salary" / "index.html").as_uri())
+        page.wait_for_selector("#results .result-card", timeout=15000)
         page.click("#tabOffer")
-        page.wait_for_timeout(300)
+        page.wait_for_timeout(400)
         ok("이직 폼 표시", page.is_visible("#formOffer") and not page.is_visible("#formCompare"))
         offer_text = page.inner_text("#results")
         ok("이직 결과 렌더", all(k in offer_text for k in ("이직 세후 월 차액", "실질 인상률", "퇴직금 1년분", "현 직장", "이직 제안")))
@@ -139,6 +144,12 @@ def main():
         ok("이직 결과 가로 넘침 없음", ov["sw"] <= ov["iw"] + 1 and not ov["over"], str(ov))
         page.screenshot(path=str(SHOTS / "salary-offer-desktop.png"), full_page=True)
         check_links(page, "월급")
+        ok("월급 계산 기준·사례 섹션 노출",
+           page.is_visible("#basis") and page.is_visible("#cases") and page.is_visible("#tips"), "")
+        faq_n = page.evaluate("() => document.querySelectorAll('#faq details').length")
+        ok("월급 FAQ 15개 이상", faq_n >= 15, f"{faq_n}개")
+        ok("월급 모바일 목차 링크 6개",
+           page.evaluate("() => document.querySelectorAll('.mobile-toc a').length") == 6, "")
         page.close()
 
         # ---------- 4. 모바일: 메인 + 월급 + 개인정보 ----------
@@ -159,9 +170,9 @@ def main():
                 .filter(a => a.offsetParent !== null).map(a => ({text: a.textContent.trim(),
                   h: Math.round(a.getBoundingClientRect().height),
                   top: Math.round(a.getBoundingClientRect().top)}))""")
-            ok(f"{name} 모바일 계산기 탭 2개 노출", len(visible_nav) == 2, str(visible_nav))
-            ok(f"{name} 모바일 두 탭 같은 줄·같은 높이",
-               len(visible_nav) == 2 and len({t["h"] for t in visible_nav}) == 1
+            ok(f"{name} 모바일 계산기 탭 3개 노출", len(visible_nav) == 3, str(visible_nav))
+            ok(f"{name} 모바일 세 탭 같은 줄·같은 높이",
+               len(visible_nav) == 3 and len({t["h"] for t in visible_nav}) == 1
                and len({t["top"] for t in visible_nav}) == 1, str(visible_nav))
             if name == "월급":
                 ok("월급 모바일 미니바 표시", page.is_visible("#miniBar"))

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>명세 — 2027 월급 실수령액 계산기 | 2026년 비교·이직 연봉 세후 비교</title>
-<meta name="description" content="2027년 1월부터 오르는 국민연금 5.0%와 장기요양보험료를 반영해 월 실수령액이 2026년보다 얼마나 줄어드는지 계산합니다. 이직 제안 연봉의 세후 월 차액, 실질 인상률, 퇴직금 차이까지 한 번에 비교하세요.">
+<meta name="description" content="2027년 국민연금 5.0%와 장기요양 13.90%를 반영한 월 실수령액을 2026년과 비교합니다. 연봉별 실수령 표, 이직 사례 4건, 세후 400만원 연봉 역산, 퇴직금 포함 여부까지 한 번에 확인하세요.">
 <meta name="keywords" content="2027 월급 실수령액, 연봉 실수령액 계산기, 2027 국민연금 5%, 4대보험 요율 2027, 이직 연봉 비교, 세후 연봉, 실질 인상률, 퇴직금 계산, 최저임금 10700원">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="author" content="명세">
@@ -77,6 +77,15 @@
       <li>입력값 저장·전송 없음</li>
     </ul>
   </section>
+
+  <nav class="mobile-toc" aria-label="페이지 목차">
+    <a href="#calc">계산기</a>
+    <a href="#changes">2027년 변화</a>
+    <a href="#basis">계산 기준</a>
+    <a href="#cases">이직 사례</a>
+    <a href="#tips">협상 팁</a>
+    <a href="#faq">자주 묻는 질문</a>
+  </nav>
 
   <section id="calc" class="wrap calc-wrap" aria-label="월급·이직 계산기">
     <div class="calc-main">
@@ -347,6 +356,256 @@
     </p>
   </section>
 
+  <!-- 계산 방법 -->
+  <section id="basis" class="wrap prose">
+    <h2>계산 기준 — 연봉 5,000만원이 3,608,707원이 되기까지</h2>
+    <p>
+      이 계산기는 <strong>세전 연봉 → 월 급여 → 비과세 분리 → 4대보험 → 연간 소득세 → 월 실수령</strong> 순서로 계산합니다.
+      아래는 연봉 5,000만원(퇴직금 별도), 부양가족 2명·자녀 1명, 월 식대 20만원이라는 조건에서 계산기가 실제로 거치는 과정입니다.
+      화면의 결과와 같은 숫자이므로, 급여명세서와 비교하며 어느 단계에서 차이가 나는지 짚어 볼 수 있습니다.
+    </p>
+
+    <h3>1. 월 급여와 과세 기준</h3>
+    <ul class="checklist">
+      <li><strong>월 급여</strong> = 연봉 ÷ 12 = 4,166,666원. 연봉에 퇴직금이 포함돼 있으면 ÷13을 씁니다(12개월 급여 + 퇴직금 1개월분).</li>
+      <li><strong>과세 월보수</strong> = 월 급여 − 비과세 = 4,166,666 − 200,000 = <strong>3,966,666원</strong>. 4대보험과 소득세는 모두 이 금액을 기준으로 합니다.</li>
+      <li><strong>연간 과세 총급여</strong> = 3,966,666 × 12 = 47,600,000원. 소득세는 월 급여가 아니라 이 연간 금액으로 계산합니다.</li>
+    </ul>
+
+    <h3>2. 4대보험 (근로자 부담)</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">연봉 5,000만원 기준 2027년 4대보험료 계산</caption>
+        <thead>
+          <tr><th scope="col">항목</th><th scope="col">월 금액</th><th scope="col">연 금액</th><th scope="col">계산식</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">국민연금</th><td data-label="월 금액">198,333원</td><td data-label="연 금액">2,379,996원</td><td data-label="계산식">과세 월보수 × 5.0%</td></tr>
+          <tr><th scope="row">건강보험</th><td data-label="월 금액">142,601원</td><td data-label="연 금액">1,711,212원</td><td data-label="계산식">과세 월보수 × 3.595%</td></tr>
+          <tr><th scope="row">장기요양</th><td data-label="월 금액">19,821원</td><td data-label="연 금액">237,852원</td><td data-label="계산식">건강보험료 × 13.90%</td></tr>
+          <tr><th scope="row">고용보험</th><td data-label="월 금액">35,699원</td><td data-label="연 금액">428,388원</td><td data-label="계산식">과세 월보수 × 0.9%</td></tr>
+          <tr><th scope="row">합계</th><td data-label="월 금액">396,454원</td><td data-label="연 금액">4,757,448원</td><td data-label="계산식">과세 소득의 10.0% 수준</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      국민연금에만 기준소득월액 상한(2027년 6월분까지 659만원)과 하한(41만원)이 있습니다.
+      건강보험료는 원래 전년도 보수로 부과되고 다음 해 7월에 정산되지만, 이 계산기는 입력한 연봉이 그대로 반영된다고 가정합니다.
+      장기요양보험료는 건강보험료에 13.90%를 곱하므로 소득 대비로는 0.4997%(3.595% × 13.90%)입니다.
+    </p>
+
+    <h3>3. 소득세 — 공제와 세율</h3>
+    <p>연간 과세 총급여 47,600,000원에서 출발해 다음 순서로 결정세액을 구합니다.</p>
+    <ol class="steps">
+      <li><strong>근로소득공제 12,130,000원</strong> → 근로소득금액 35,470,000원 (1,200만원 + 4,500만원 초과분 260만원의 5%)</li>
+      <li><strong>기본공제 4,500,000원</strong> — 본인과 부양가족 2명, 1인당 150만원 → 30,970,000원</li>
+      <li><strong>연금보험료공제 2,379,996원</strong> — 국민연금 근로자 부담 전액 → 28,590,004원</li>
+      <li><strong>건강·고용보험료 특별소득공제 2,377,452원</strong> → 과세표준 <strong>26,212,552원</strong></li>
+      <li><strong>산출세액 2,671,882원</strong> = 26,212,552 × 15% − 누진공제 1,260,000원</li>
+      <li><strong>세액공제 910,000원</strong> = 근로소득세액공제 660,000원(총급여 4,760만원의 공제 한도) + 자녀세액공제 250,000원 → <strong>결정세액 1,761,882원</strong></li>
+      <li><strong>지방소득세 176,188원</strong> = 결정세액 × 10%</li>
+    </ol>
+    <p>
+      4단계의 특별소득공제와 표준세액공제 13만원은 함께 받을 수 없습니다. 계산기는 두 경우의 결정세액을 모두 계산해
+      낮은 쪽을 자동으로 고르며, 이 조건에서는 특별소득공제가 유리합니다(과세표준이 270만원가량 낮아집니다).
+      기본공제는 부양가족 1인당 150만원이고, 자녀세액공제는 1명 250,000원, 2명 550,000원, 3명 이상은 2명을 넘는 1명당
+      400,000원을 더합니다.
+    </p>
+
+    <h3>4. 월 실수령액</h3>
+    <p>
+      세전 월급 4,166,666원에서 4대보험 396,454원, 소득세 146,823원, 지방소득세 14,682원을 빼면
+      <strong>3,608,707원</strong>입니다. 월 공제 합계는 557,959원으로 월급의 13.4%이고, 연간으로는 43,304,482원이 남습니다.
+      같은 연봉이라도 2026년 요율로는 3,617,893원이므로, 2027년에는 월 9,186원(연 110,230원)이 줄어드는 셈입니다.
+    </p>
+
+    <h3>근로소득공제 구간</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">근로소득공제 구간표</caption>
+        <thead><tr><th scope="col">총급여</th><th scope="col">공제액</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">500만원 이하</th><td data-label="공제액">총급여 × 70%</td></tr>
+          <tr><th scope="row">500만 ~ 1,500만원</th><td data-label="공제액">350만원 + 500만원 초과분 × 40%</td></tr>
+          <tr><th scope="row">1,500만 ~ 4,500만원</th><td data-label="공제액">750만원 + 1,500만원 초과분 × 15%</td></tr>
+          <tr><th scope="row">4,500만 ~ 1억원</th><td data-label="공제액">1,200만원 + 4,500만원 초과분 × 5%</td></tr>
+          <tr><th scope="row">1억원 초과</th><td data-label="공제액">1,475만원 + 1억원 초과분 × 2%</td></tr>
+          <tr><th scope="row">한도</th><td data-label="공제액">2,000만원</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>소득세 기본세율 구간</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">소득세 기본세율과 누진공제</caption>
+        <thead><tr><th scope="col">과세표준</th><th scope="col">세율</th><th scope="col">누진공제</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1,400만원 이하</th><td data-label="세율">6%</td><td data-label="누진공제">0원</td></tr>
+          <tr><th scope="row">1,400만 ~ 5,000만원</th><td data-label="세율">15%</td><td data-label="누진공제">1,260,000원</td></tr>
+          <tr><th scope="row">5,000만 ~ 8,800만원</th><td data-label="세율">24%</td><td data-label="누진공제">5,760,000원</td></tr>
+          <tr><th scope="row">8,800만 ~ 1억 5,000만원</th><td data-label="세율">35%</td><td data-label="누진공제">15,440,000원</td></tr>
+          <tr><th scope="row">1억 5,000만 ~ 3억원</th><td data-label="세율">38%</td><td data-label="누진공제">19,940,000원</td></tr>
+          <tr><th scope="row">3억 ~ 5억원</th><td data-label="세율">40%</td><td data-label="누진공제">25,940,000원</td></tr>
+          <tr><th scope="row">5억 ~ 10억원</th><td data-label="세율">42%</td><td data-label="누진공제">35,940,000원</td></tr>
+          <tr><th scope="row">10억원 초과</th><td data-label="세율">45%</td><td data-label="누진공제">65,940,000원</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>같은 연봉 5,000만원, 조건이 다르면 실수령이 이만큼 달라집니다</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">연봉 5,000만원에서 부양가족·비과세 조건에 따른 2027년 월 실수령액</caption>
+        <thead>
+          <tr><th scope="col">조건</th><th scope="col">월 실수령</th><th scope="col">기준 대비</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">부양가족 없음 · 비과세 없음</th><td data-label="월 실수령">3,496,500원</td><td data-label="기준 대비">−112,207원</td></tr>
+          <tr><th scope="row">부양가족 없음 · 식대 20만원</th><td data-label="월 실수령">3,544,541원</td><td data-label="기준 대비">−64,166원</td></tr>
+          <tr><th scope="row">부양가족 2명 · 자녀 없음</th><td data-label="월 실수령">3,585,791원</td><td data-label="기준 대비">−22,916원</td></tr>
+          <tr><th scope="row">부양가족 2명 · 자녀 1명</th><td data-label="월 실수령">3,608,707원</td><td data-label="기준 대비">기준</td></tr>
+          <tr><th scope="row">부양가족 4명 · 자녀 2명 · 식대·자가운전·보육 각 20만원</th><td data-label="월 실수령">3,770,661원</td><td data-label="기준 대비">+161,954원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">
+      같은 연봉인데도 조건에 따라 월 27만원 가까이 차이가 납니다. 비과세가 늘면 소득세뿐 아니라 4대보험료도 함께 줄기 때문입니다.
+      식대 20만원이 비과세일 때 4대보험은 416,443원에서 396,454원으로 월 19,989원 줄어듭니다.
+      위 값은 모두 2027년 요율, 고용보험 0.9% 기준입니다.
+    </p>
+
+    <h3>계산의 한계</h3>
+    <ul class="checklist">
+      <li>월 소득세는 연말정산 기준 세액을 12로 나눈 <strong>예상치</strong>입니다. 실제 원천징수는 회사가 신고한 부양가족 수와 근로소득 간이세액표에 따라 계산되므로 급여명세서와 월 1만~10만원 안팎 차이가 날 수 있고(부양가족이 많을수록 간이세액표의 세액이 더 낮습니다), 차액은 연말정산에서 정산됩니다.</li>
+      <li>건강보험료는 전년도 보수를 기준으로 산정되어 7월에 정산됩니다. 연봉이 중간에 오르면 실제 공제액은 바로 바뀌지 않을 수 있습니다.</li>
+      <li>2027년 국민연금 기준소득월액 상한은 2027년 6월분까지 659만원으로 확정되었고, 7월분부터는 고시 전이라 같은 금액을 가정했습니다.</li>
+      <li>주택자금·청약저축·소기업 공제·우리사주·연금계좌 세액공제, 신용카드 소득공제, 의료비·교육비·기부금·월세 세액공제는 반영하지 않았습니다. 이 항목이 많으면 실제 결정세액은 더 낮아집니다.</li>
+      <li>퇴직금은 총보상 기준의 1년분 세전 적립액입니다(포함 연봉이면 연봉÷13, 별도면 연봉÷12). 퇴직소득세, 근속기간, 평균임금 산정 방식은 반영하지 않았습니다.</li>
+    </ul>
+  </section>
+
+  <!-- 이직 사례 -->
+  <section id="cases" class="wrap prose">
+    <h2>이직·연봉 협상 실제 계산 사례 4건</h2>
+    <p>
+      아래 사례는 모두 <strong>부양가족 2명, 자녀 1명, 월 식대 20만원, 퇴직금 별도, 2027년 요율, 고용보험 0.9%</strong>를
+      가정하고 이 계산기로 산출한 값입니다. 계산기 입력 칸에 같은 조건을 넣으면 동일한 숫자가 나옵니다.
+    </p>
+
+    <h3>사례 1 — 연봉 4,000만원에서 5,000만원으로 (+25.0%)</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">연봉 4,000만원에서 5,000만원 이직 시 세후 비교</caption>
+        <thead><tr><th scope="col">구분</th><th scope="col">현 직장 4,000만원</th><th scope="col">이직 제안 5,000만원</th><th scope="col">차이</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">세전 월급</th><td data-label="현 직장">3,333,333원</td><td data-label="이직 제안">4,166,666원</td><td data-label="차이">+833,333원</td></tr>
+          <tr><th scope="row">4대보험</th><td data-label="현 직장">313,165원</td><td data-label="이직 제안">396,454원</td><td data-label="차이">+83,289원</td></tr>
+          <tr><th scope="row">소득세 + 지방소득세</th><td data-label="현 직장">50,837원</td><td data-label="이직 제안">161,505원</td><td data-label="차이">+110,668원</td></tr>
+          <tr><th scope="row">세후 월 실수령</th><td data-label="현 직장">2,969,331원</td><td data-label="이직 제안">3,608,707원</td><td data-label="차이">+639,376원</td></tr>
+          <tr><th scope="row">세후 연 실수령</th><td data-label="현 직장">35,631,957원</td><td data-label="이직 제안">43,304,482원</td><td data-label="차이">+7,672,525원</td></tr>
+          <tr><th scope="row">퇴직금 1년분</th><td data-label="현 직장">3,333,333원</td><td data-label="이직 제안">4,166,666원</td><td data-label="차이">+833,333원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      세전으로는 25.0%(연 1,000만원) 인상이지만, 늘어난 월 833,333원 가운데 4대보험 83,289원과 세금 110,668원이 빠져
+      실제로 손에 들어오는 돈은 <strong>월 639,376원</strong>입니다. 세후 인상률은 <strong>21.5%</strong>입니다.
+      이 구간은 소득세가 월 5만원 수준으로 낮아, 5,000만원으로 넘어가면 세금이 3배 이상(월 161,505원)으로 뛰는 것이 특징입니다.
+      퇴직금까지 더한 총보상은 4,333만원에서 5,416만원으로 1,083만원 늘어납니다.
+    </p>
+
+    <h3>사례 2 — 연봉 6,000만원에서 7,200만원으로 (+20.0%)</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">연봉 6,000만원에서 7,200만원 이직 시 세후 비교</caption>
+        <thead><tr><th scope="col">구분</th><th scope="col">현 직장 6,000만원</th><th scope="col">이직 제안 7,200만원</th><th scope="col">차이</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">세전 월급</th><td data-label="현 직장">5,000,000원</td><td data-label="이직 제안">6,000,000원</td><td data-label="차이">+1,000,000원</td></tr>
+          <tr><th scope="row">4대보험</th><td data-label="현 직장">479,745원</td><td data-label="이직 제안">579,691원</td><td data-label="차이">+99,946원</td></tr>
+          <tr><th scope="row">소득세 + 지방소득세</th><td data-label="현 직장">278,386원</td><td data-label="이직 제안">418,646원</td><td data-label="차이">+140,260원</td></tr>
+          <tr><th scope="row">세후 월 실수령</th><td data-label="현 직장">4,241,869원</td><td data-label="이직 제안">5,001,663원</td><td data-label="차이">+759,794원</td></tr>
+          <tr><th scope="row">세후 연 실수령</th><td data-label="현 직장">50,902,406원</td><td data-label="이직 제안">60,019,947원</td><td data-label="차이">+9,117,541원</td></tr>
+          <tr><th scope="row">퇴직금 1년분</th><td data-label="현 직장">5,000,000원</td><td data-label="이직 제안">6,000,000원</td><td data-label="차이">+1,000,000원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      연봉이 높아져도 세율 구간은 여전히 15%(과세표준 4,491만원)라서, 세전 인상분 1,000,000원 중 759,794원이 남습니다.
+      세후 인상률 <strong>17.9%</strong>는 사례 1(21.5%)보다 낮은데, 4대보험료가 과세 소득에 비례해 함께 늘고
+      근로소득세액공제 한도(660,000원)는 이미 다 받고 있어 더 늘지 않기 때문입니다.
+    </p>
+
+    <h3>사례 3 — “퇴직금 포함” 6,000만원은 5,000만원에서 얼마나 오른 걸까</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">퇴직금 별도 5,000만원에서 퇴직금 포함 6,000만원으로 이직 시 비교</caption>
+        <thead><tr><th scope="col">구분</th><th scope="col">현 직장 5,000만원 (퇴직금 별도)</th><th scope="col">이직 제안 6,000만원 (퇴직금 포함)</th><th scope="col">차이</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">연봉 표기</th><td data-label="현 직장">5,000만원</td><td data-label="이직 제안">6,000만원</td><td data-label="차이">+1,000만원 (표면 +20.0%)</td></tr>
+          <tr><th scope="row">월 급여</th><td data-label="현 직장">4,166,666원</td><td data-label="이직 제안">4,615,384원</td><td data-label="차이">+448,718원 (+10.8%)</td></tr>
+          <tr><th scope="row">총보상 (퇴직금 포함 기준)</th><td data-label="현 직장">54,166,666원</td><td data-label="이직 제안">60,000,000원</td><td data-label="차이">+5,833,334원 (+10.8%)</td></tr>
+          <tr><th scope="row">4대보험</th><td data-label="현 직장">396,454원</td><td data-label="이직 제안">441,303원</td><td data-label="차이">+44,849원</td></tr>
+          <tr><th scope="row">소득세 + 지방소득세</th><td data-label="현 직장">161,505원</td><td data-label="이직 제안">284,730원</td><td data-label="차이">+123,225원</td></tr>
+          <tr><th scope="row">세후 월 실수령</th><td data-label="현 직장">3,608,707원</td><td data-label="이직 제안">3,889,351원</td><td data-label="차이">+280,644원</td></tr>
+          <tr><th scope="row">퇴직금 1년분</th><td data-label="현 직장">4,166,666원</td><td data-label="이직 제안">4,615,384원</td><td data-label="차이">+448,718원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      표면적으로는 연봉이 20% 오른 것처럼 보이지만, 퇴직금 포함 연봉은 13으로 나눠 월 급여를 정하므로 실제 월급 인상은
+      <strong>10.8%</strong>입니다. 세후 월 차액은 280,644원으로, 같은 6,000만원을 퇴직금 별도로 받을 때(4,241,869원)보다
+      <strong>352,518원 적습니다.</strong> 제안서에 “퇴직금 포함”이라고 적혀 있다면 반드시 별도 조건으로 환산해 비교하세요.
+    </p>
+
+    <h3>사례 4 — 연봉 5,000만원 → 6,000만원 + 인센티브 500만원</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">연봉 5,000만원에서 6,000만원과 인센티브 500만원 제안 비교</caption>
+        <thead><tr><th scope="col">구분</th><th scope="col">현 직장</th><th scope="col">이직 제안</th><th scope="col">차이</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">세전 연봉</th><td data-label="현 직장">5,000만원</td><td data-label="이직 제안">6,000만원</td><td data-label="차이">+1,000만원</td></tr>
+          <tr><th scope="row">인센티브 (연간)</th><td data-label="현 직장">0원</td><td data-label="이직 제안">500만원</td><td data-label="차이">+500만원</td></tr>
+          <tr><th scope="row">월 과세 급여 (인센티브 12분할)</th><td data-label="현 직장">4,166,666원</td><td data-label="이직 제안">5,416,666원</td><td data-label="차이">+1,250,000원</td></tr>
+          <tr><th scope="row">4대보험</th><td data-label="현 직장">396,454원</td><td data-label="이직 제안">521,388원</td><td data-label="차이">+124,934원</td></tr>
+          <tr><th scope="row">소득세 + 지방소득세</th><td data-label="현 직장">161,505원</td><td data-label="이직 제안">336,828원</td><td data-label="차이">+175,323원</td></tr>
+          <tr><th scope="row">세후 월 실수령</th><td data-label="현 직장">3,608,707원</td><td data-label="이직 제안">4,558,450원</td><td data-label="차이">+949,743원</td></tr>
+          <tr><th scope="row">세후 연 실수령</th><td data-label="현 직장">43,304,482원</td><td data-label="이직 제안">54,701,393원</td><td data-label="차이">+11,396,911원</td></tr>
+          <tr><th scope="row">총보상 (퇴직금 포함 기준)</th><td data-label="현 직장">54,166,666원</td><td data-label="이직 제안">70,416,666원</td><td data-label="차이">+16,250,000원 (+30.0%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      계산기의 <strong>‘예시 불러오기’</strong>를 누르면 이 조건이 그대로 입력됩니다. 인센티브는 12개월로 나눠 매월 받는다고 가정한 값으로,
+      세전 월 과세 급여가 1,250,000원 늘어도 4대보험 124,934원과 세금 175,323원이 빠져 실제로는 <strong>월 949,743원</strong>이 늘어납니다.
+      세전 총보상은 30.0% 늘지만 세후로는 26.3%입니다. 실제로는 지급월에 상여로 몰아서 원천징수되므로 그 달 실수령이 크게 줄고
+      다음 달에 일부 돌아오며, 지급률이 확정되지 않은 인센티브는 빼고 기본급만으로 비교하는 편이 안전합니다.
+    </p>
+
+    <h3>목표 세후 월 실수령액에서 연봉 역산하기</h3>
+    <p>
+      “세후 400만원을 받으려면 연봉이 얼마여야 하나”처럼 반대 방향으로 찾을 때 쓰는 표입니다.
+      위와 같은 조건(부양가족 2명·자녀 1명·식대 20만원·퇴직금 별도·2027년 요율)에서 1만원 단위로 맞춘 값입니다.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">목표 세후 월 실수령액에 필요한 세전 연봉</caption>
+        <thead><tr><th scope="col">목표 세후 월</th><th scope="col">필요한 세전 연봉</th><th scope="col">계산기 결과</th><th scope="col">목표와 차이</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">280만원</th><td data-label="필요한 세전 연봉">3,743만원</td><td data-label="계산기 결과">2,800,053원</td><td data-label="목표와 차이">+53원</td></tr>
+          <tr><th scope="row">300만원</th><td data-label="필요한 세전 연봉">4,048만원</td><td data-label="계산기 결과">3,000,030원</td><td data-label="목표와 차이">+30원</td></tr>
+          <tr><th scope="row">350만원</th><td data-label="필요한 세전 연봉">4,829만원</td><td data-label="계산기 결과">3,500,436원</td><td data-label="목표와 차이">+436원</td></tr>
+          <tr><th scope="row">400만원</th><td data-label="필요한 세전 연봉">5,618만원</td><td data-label="계산기 결과">4,000,001원</td><td data-label="목표와 차이">+1원</td></tr>
+          <tr><th scope="row">450만원</th><td data-label="필요한 세전 연봉">6,408만원</td><td data-label="계산기 결과">4,500,198원</td><td data-label="목표와 차이">+198원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">
+      세후 월 400만원에는 세전 연봉 약 5,618만원이 필요합니다. 부양가족이 늘거나 비과세가 많아지면 같은 세후 금액에 필요한
+      연봉은 낮아집니다. 계산기에서 연봉 칸을 1만원씩 바꿔 보면 원하는 세후 금액을 정확히 찾을 수 있습니다.
+    </p>
+  </section>
+
   <!-- 이직 팁 -->
   <section id="tips" class="wrap prose">
     <h2>이직 연봉 협상에서 실수하기 쉬운 5가지</h2>
@@ -359,63 +618,12 @@
       <li><strong>인센티브는 확정 급여가 아닙니다.</strong> 성과급·인센티브는 지급 조건과 최근 3년 지급률을 확인하세요. 기본급 기준으로도 비교해 두면 안전합니다.</li>
       <li><strong>비과세 항목이 줄어들 수 있습니다.</strong> 식대 월 20만원, 자가운전보조금 월 20만원 등 비과세가 사라지면 세전 연봉이 같아도 실수령액은 줄어듭니다.</li>
       <li><strong>4대보험 상한과 소득세 구간을 확인하세요.</strong> 연봉이 국민연금 상한(월 659만원)을 넘으면 보험료 증가는 멈추지만, 소득세는 다음 구간(15%→24%→35%)으로 올라갈 수 있습니다.</li>
-      <li><strong>연봉 협상은 세전 기준으로 이뤄집니다.</strong> “세후 400만원”을 원한다면 세전 연봉을 조금씩 바꿔 넣어 보세요. 이 계산기는 입력한 연봉의 세후 월 실수령액을 보여 주므로, 목표 금액에 가까운 연봉을 찾을 때까지 연봉 칸을 바꿔 보면 됩니다. 세후 인상률이 세전 인상률보다 낮다는 점도 기억하세요.</li>
+      <li><strong>연봉 협상은 세전 기준으로 이뤄집니다.</strong> “세후 400만원”을 원한다면 세전 연봉을 조금씩 바꿔 넣어 보세요. 이 계산기는 입력한 연봉의 세후 월 실수령액을 보여 주므로, <a href="#cases">목표 세후 역산표</a>에서 출발해 연봉 칸을 조정하면 됩니다. 세후 인상률이 세전 인상률보다 낮다는 점도 기억하세요.</li>
     </ol>
-
-    <h3>이직 제안 비교 예시</h3>
-    <div class="table-wrap">
-      <table>
-        <caption class="sr-only">이직 제안 세후 비교 예시</caption>
-        <thead>
-          <tr><th scope="col">구분</th><th scope="col">현 직장</th><th scope="col">이직 제안</th><th scope="col">차이</th></tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">세전 연봉</th><td data-label="현 직장">5,000만원</td><td data-label="이직 제안">5,800만원</td><td data-label="차이">+800만원 (+16.0%)</td></tr>
-          <tr><th scope="row">세후 월 실수령</th><td data-label="현 직장">3,608,707원</td><td data-label="이직 제안">4,115,238원</td><td data-label="차이">+506,531원</td></tr>
-          <tr><th scope="row">세후 연 실수령</th><td data-label="현 직장">4,330만원</td><td data-label="이직 제안">4,938만원</td><td data-label="차이">+608만원 (+14.0%)</td></tr>
-          <tr><th scope="row">퇴직금 1년분</th><td data-label="현 직장">4,166,666원</td><td data-label="이직 제안">4,833,333원</td><td data-label="차이">+666,667원</td></tr>
-        </tbody>
-      </table>
-    </div>
     <p class="muted">
-      배우자와 자녀 1명, 월 비과세 20만원, 2027년 요율 기준입니다. 세전 16% 인상이 세후로는 14% 인상이 됩니다.
-      여기에 인센티브 500만원이 별도로 붙으면 세전 총보상은 6,300만원, 세후 월 실수령은 약 443만원까지 올라갑니다.
+      세후 차액과 실질 인상률을 숫자로 비교한 사례는 위의 <a href="#cases">이직·연봉 협상 실제 계산 사례 4건</a>에 정리했습니다.
+      퇴직금 포함 조건과 인센티브가 결과를 어떻게 바꾸는지도 함께 확인할 수 있습니다.
     </p>
-  </section>
-
-  <!-- 계산 방법 -->
-  <section class="wrap prose">
-    <h2>계산 방법과 가정</h2>
-    <p>
-      월 실수령액은 <strong>세전 월급 − 4대보험 근로자 부담 − 소득세 − 지방소득세</strong>로 계산합니다.
-      4대보험은 비과세를 뺀 과세 월보수를 기준으로 하고, 소득세는 연간 소득세를 12개월로 나눠 월별 금액으로 환산했습니다.
-    </p>
-    <div class="table-wrap">
-      <table>
-        <caption class="sr-only">계산에 쓰는 공식과 요율</caption>
-        <thead><tr><th scope="col">항목</th><th scope="col">계산식</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">국민연금</th><td data-label="계산식">과세 월보수(상한 659만·하한 41만) × 5.0%</td></tr>
-          <tr><th scope="row">건강보험</th><td data-label="계산식">과세 월보수 × 3.595%</td></tr>
-          <tr><th scope="row">장기요양</th><td data-label="계산식">건강보험료 × 13.90% (소득 대비 0.9994%)</td></tr>
-          <tr><th scope="row">고용보험</th><td data-label="계산식">과세 월보수 × 0.9% (개정안 반영 시 1.0%)</td></tr>
-          <tr><th scope="row">소득세</th><td data-label="계산식">(과세급여 − 근로소득공제 − 기본공제 − 연금보험료공제 − 건강·고용보험료 공제) × 기본세율 − 근로소득세액공제 − 자녀세액공제</td></tr>
-          <tr><th scope="row">지방소득세</th><td data-label="계산식">소득세 × 10%</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p>
-      표준세액공제(13만원)와 건강·장기요양·고용보험료 소득공제 중 유리한 쪽을 자동으로 고릅니다.
-      부양가족 기본공제는 1인당 150만원, 자녀세액공제는 1명 25만원·2명 55만원·3명 이상은 2명 초과 1명당 40만원을 더합니다.
-    </p>
-    <h3>계산의 한계</h3>
-    <ul class="checklist">
-      <li>월 소득세는 연말정산 기준 세액을 12로 나눈 <strong>예상치</strong>입니다. 실제 원천징수는 회사가 신고한 부양가족 수와 근로소득 간이세액표에 따라 계산되므로 급여명세서와 월 1만~10만원 안팎 차이가 날 수 있고(부양가족이 많을수록 간이세액표의 세액이 더 낮습니다), 차액은 연말정산에서 정산됩니다.</li>
-      <li>건강보험료는 전년도 보수를 기준으로 산정되어 7월에 정산됩니다. 연봉이 중간에 오르면 실제 공제액은 바로 바뀌지 않을 수 있습니다.</li>
-      <li>2027년 국민연금 기준소득월액 상한은 2027년 6월분까지 659만원으로 확정되었고, 7월분부터는 고시 전이라 같은 금액을 가정했습니다.</li>
-      <li>주택자금·청약저축·소기업 공제·우리사주·연금계좌 세액공제, 신용카드 소득공제, 의료비·교육비·기부금·월세 세액공제는 반영하지 않았습니다. 이 항목이 많으면 실제 결정세액은 더 낮아집니다.</li>
-      <li>퇴직금은 총보상 기준의 1년분 세전 적립액입니다(포함 연봉이면 연봉÷13, 별도면 연봉÷12). 퇴직소득세, 근속기간, 평균임금 산정 방식은 반영하지 않았습니다.</li>
-    </ul>
   </section>
 
   <!-- FAQ -->
@@ -466,6 +674,26 @@
         <summary>2027년 소득세율 구간이 바뀌나요?</summary>
         <p>아닙니다. 2026년 세제개편안에는 소득세 과세표준 구간·세율 조정이 포함되지 않았고, 식대 비과세 20만원과 기본공제 150만원도 그대로입니다. 다만 국회에서 계류 중인 법안이 통과되면 달라질 수 있으므로, 계산기는 확정된 현행 기준으로 동작합니다.</p>
       </details>
+      <details>
+        <summary>식대 20만원 비과세는 2027년에도 그대로인가요?</summary>
+        <p>네. 2027년 귀속에도 월 20만원까지 소득세가 붙지 않습니다(소득세법 제12조 제3호 러목, 2026년 세제개편안 변경 없음). 다만 회사가 구내식당·도시락처럼 식사를 직접 제공하는 근로자에게 따로 주는 현금 식대는 전액 과세되고, 급여지급기준에 식대 지급 근거가 있어야 비과세가 인정됩니다. 한도를 넘는 금액도 과세로 돌아갑니다(이 계산기에 30만원을 넣어도 20만원까지만 비과세). 연봉 5,000만원 기준으로 식대 20만원이 있으면 없을 때보다 월 48,041원, 연 576,492원 많습니다.</p>
+      </details>
+      <details>
+        <summary>성과급·상여금도 계산에 넣어야 하나요?</summary>
+        <p>받을 것이 확정돼 있다면 이직 비교의 ‘인센티브’ 칸에 연간 금액으로 넣으세요. 계산기는 이를 12개월로 나눠 과세소득과 4대보험에 반영합니다. 실제로는 지급월에 상여로 몰아서 원천징수되므로 그 달 공제가 커지고 다음 달에 일부 돌아옵니다. 지급률이 정해지지 않은 성과급은 빼고 기본급만으로 비교하는 편이 안전합니다. 건강보험료는 다음 해 보수총액 신고로 정산되므로, 상여가 많았다면 이듬해 4월 이후 보험료가 오를 수 있습니다.</p>
+      </details>
+      <details>
+        <summary>세후 월 400만원을 받으려면 연봉이 얼마여야 하나요?</summary>
+        <p>부양가족 2명·자녀 1명, 식대 20만원, 퇴직금 별도, 2027년 요율 기준으로 <strong>세전 연봉 약 5,618만원</strong>입니다. 세후 300만원은 4,048만원, 350만원은 4,829만원, 450만원은 6,408만원이 필요합니다. 부양가족이 많거나 비과세가 크면 같은 세후 금액에 필요한 연봉은 낮아지고, 맞벌이 배우자의 소득은 이 계산에 영향을 주지 않습니다(부부 각자 원천징수).</p>
+      </details>
+      <details>
+        <summary>이직하면 건강보험료가 두 번 나오나요?</summary>
+        <p>아닙니다. 자격 상실일과 취득일을 기준으로 한 곳에서만 부과됩니다. 다만 이직 사이에 공백기가 있으면 그 기간은 지역가입자가 되어 소득·재산을 기준으로 보험료가 고지되고, 이직한 달의 급여에서는 두 회사분이 나뉘어 공제될 수 있습니다. 또 건강보험료는 전년도 보수를 기준으로 매겨지므로 이직 첫해에는 새 연봉과 보험료가 어긋날 수 있습니다. 공백기 지역보험료가 궁금하면 <a href="../health/">건보료·피부양자 계산기</a>에서 확인하세요.</p>
+      </details>
+      <details>
+        <summary>부양가족이 한 명 늘면 실수령액이 얼마나 늘어나요?</summary>
+        <p>기본공제 1인당 150만원이 적용되어, 15% 구간(연봉 5,000만원 안팎)에서는 연 225,000원, 지방소득세를 포함해 월 약 20,625원이 늘어납니다. 20세 이하 자녀가 있으면 자녀세액공제 1명당 25만원이 별도로 붙어 월 22,916원이 더해집니다. 세율 구간이 24%·35%로 올라가면 공제 효과는 더 커집니다. 다만 회사에 부양가족으로 신고되어 있어야 월 급여에 반영되므로, 이직·입사 시 부양가족 신고서를 빠뜨리지 마세요.</p>
+      </details>
     </div>
   </section>
 
@@ -494,16 +722,30 @@
       <li>보건복지부 — 2027년 1~6월 국민연금 기준소득월액 상한 659만원·하한 41만원 고시</li>
       <li>고용노동부 — 2027년 적용 최저임금 고시(제2026-60호): 시급 10,700원, 월 2,236,300원</li>
       <li>고용노동부 — 고용보험 제도개편 방안(2026.9.1) 및 「고용보험 및 산업재해보상보험의 보험료징수 등에 관한 법률 시행령」 제12조(실업급여 1.8%, 근로자 0.9%)</li>
-      <li>국세청 — 근로소득 원천징수방법(간이세액표), 소득세법 제55조(세율)·제59조의2(자녀세액공제)·제59조의4(표준세액공제)</li>
+      <li>국세청 — 근로소득 원천징수방법(간이세액표), 소득세법 제12조 제3호 러목(식대·자가운전보조금·보육수당 비과세), 제47조(근로소득공제), 제50조(기본공제), 제51조(연금보험료공제), 제52조(특별소득공제), 제55조(세율), 제59조(근로소득세액공제)·제59조의2(자녀세액공제)·제59조의4(표준세액공제)</li>
       <li>기획재정부 — 2026년 세제개편안(2026.8.3): 소득세 과표구간·식대 비과세 변경 없음</li>
     </ul>
+  </section>
+
+  <section class="wrap prose">
+    <h2>다른 계산기</h2>
+    <div class="tool-grid">
+      <a class="tool-card" href="../">
+        <strong>연말정산 계산기</strong>
+        <span>맞벌이 몰아주기 최적 분할과 예상 환급액</span>
+      </a>
+      <a class="tool-card" href="../health/">
+        <strong>건보료·피부양자</strong>
+        <span>피부양자 탈락 판정과 지역건보료 모의계산</span>
+      </a>
+    </div>
   </section>
 </main>
 
 <footer class="site-foot">
   <div class="wrap">
     <p class="foot-note"><strong>명세</strong> · 모든 계산은 브라우저 안에서만 처리되며 입력값은 저장·전송되지 않습니다. · <a href="../privacy/">개인정보처리방침</a></p>
-    <p class="foot-links"><a href="../">연말정산 계산기</a><span>·</span><a href="./">월급·이직 비교</a><span>·</span><a href="../health/">건보료·피부양자</a><span>·</span><a href="../about/">명세 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 22.</p>
+    <p class="foot-links"><a href="../">연말정산 계산기</a><span>·</span><a href="./">월급·이직 비교</a><span>·</span><a href="../health/">건보료·피부양자</a><span>·</span><a href="../about/">명세 소개</a><span>·</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSdM2LkD_MTW02ze4NGLR78Rl7Qn0htY8W3W7yBpHonKxBE9bA/viewform" target="_blank" rel="noopener">오류 제보 · 개선 의견</a><span>·</span>최근 업데이트 2026. 11. 25.</p>
   </div>
 </footer>
 
@@ -525,6 +767,7 @@
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "All",
       "inLanguage": "ko-KR",
+      "dateModified": "2026-11-25",
       "description": "2027년 국민연금 5.0%, 장기요양보험료 13.90%를 반영한 월 실수령액과 이직 제안의 세후 인상률을 계산합니다.",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
       "featureList": [
@@ -532,6 +775,13 @@
         "이직 연봉 세후 월 차액·실질 인상률",
         "퇴직금 1년분 비교",
         "2027년 최저임금 대비 확인"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "명세", "item": "https://myeongse.kr/" },
+        { "@type": "ListItem", "position": 2, "name": "월급·이직 비교", "item": "https://myeongse.kr/salary/" }
       ]
     },
     {
@@ -566,6 +816,31 @@
           "@type": "Question",
           "name": "계산 결과가 실제 급여명세서와 다른 이유는 무엇인가요?",
           "acceptedAnswer": { "@type": "Answer", "text": "월 소득세는 연말정산 기준 세액을 12로 나눈 예상치이고, 회사는 근로소득 간이세액표에 따라 원천징수합니다. 부양가족 신고와 비과세·상여 지급 시점에 따라 월 1만~10만원 안팎 차이가 날 수 있으며 연말정산에서 정산됩니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "식대 20만원 비과세는 2027년에도 그대로인가요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "2027년 귀속에도 월 20만원까지 비과세가 유지됩니다. 회사가 식사를 직접 제공하는 근로자에게 따로 주는 현금 식대는 전액 과세되고, 한도를 넘는 금액도 과세로 돌아갑니다. 연봉 5,000만원 기준 식대 20만원은 실수령을 월 48,041원 늘립니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "성과급·상여금도 계산에 넣어야 하나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "지급이 확정된 성과급은 인센티브 칸에 연간 금액으로 넣으면 12개월로 나눠 반영됩니다. 실제로는 지급월에 몰아서 원천징수되고 다음 달에 일부 돌아오며, 건강보험료는 다음 해 보수총액 신고로 정산됩니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "세후 월 400만원을 받으려면 연봉이 얼마여야 하나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "부양가족 2명·자녀 1명, 식대 20만원, 퇴직금 별도, 2027년 요율 기준으로 세전 연봉 약 5,618만원이 필요합니다. 세후 300만원은 4,048만원, 350만원은 4,829만원, 450만원은 6,408만원입니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "이직하면 건강보험료가 두 번 나오나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "자격 상실일과 취득일을 기준으로 한 곳에서만 부과됩니다. 이직 사이 공백기가 있으면 그 기간은 지역가입자로 보험료가 고지되며, 건강보험료는 전년도 보수를 기준으로 매겨져 이직 첫해에는 새 연봉과 어긋날 수 있습니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "부양가족이 한 명 늘면 실수령액이 얼마나 늘어나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "기본공제 150만원이 적용되어 15% 구간에서는 지방소득세를 포함해 월 약 20,625원이 늘어납니다. 20세 이하 자녀는 자녀세액공제 25만원이 별도로 붙어 월 22,916원이 더해집니다." }
         }
       ]
     }
